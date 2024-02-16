@@ -18,7 +18,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         useMaterial3: true,
       ),
-      initialRoute: Routes.introsection, // Set the initial route
+      // initialRoute: Routes.introsection, // Set the initial route
+      initialRoute: Routes.login,
       routes: Routes.getRoutes(context),
       onGenerateRoute: (settings) {
         // Handle unknown routes, such as pressing the back button

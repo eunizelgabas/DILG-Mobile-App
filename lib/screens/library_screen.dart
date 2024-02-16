@@ -7,14 +7,23 @@ import 'package:path_provider/path_provider.dart'; // Import 'package:path_provi
 
 
 class LibraryScreen extends StatefulWidget {
+   final Function(String, String) onFileOpened;
+
+  LibraryScreen ({required this.onFileOpened});
+  
+
   @override
   _LibraryScreenState createState() => _LibraryScreenState();
+ 
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
   TextEditingController _searchController = TextEditingController();
   List<String> downloadedFiles = [];
   List<String> filteredFiles = [];
+  bool isSearching = false;
+  String _selectedSortOption = 'Date'; // Initialize with default sorting option
+List<String> _sortOptions = ['Date', 'Name']; // Define sorting options
 
 
 
@@ -24,7 +33,9 @@ void initState() {
   super.initState();
   _loadRootDirectory();
 }
+
 void _loadRootDirectory() async {
+
     final appDir = await getExternalStorageDirectory();
     print('Root directory path: ${appDir?.path}');
     if (appDir == null) {
@@ -61,10 +72,8 @@ Future<void> loadDownloadedFiles(Directory directory) async {
   
 }
 
-
-
-
 //for Latest Issuances - API@override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
@@ -78,34 +87,84 @@ Future<void> loadDownloadedFiles(Directory directory) async {
       ),
     );
   }
-  
-  Widget _buildSearchAndFilterRow() {
-    return Row(
+
+Widget _buildSearchAndFilterRow() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(width: 16),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                _filterFiles(value);
-              },
-              decoration: InputDecoration(
-                hintText: 'Search',
-                border: InputBorder.none,
-                icon: Icon(Icons.search),
+        Row(
+          children: [
+            Expanded(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                width: isSearching ? MediaQuery.of(context).size.width - 96 : 48,
+                decoration: BoxDecoration(
+                  color: isSearching ? Colors.grey[200] : null,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Visibility(
+                        visible: isSearching,
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) {
+                            _filterFiles(value);
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search...',
+                            border: InputBorder.none,
+                            prefixIcon: Icon(Icons.search),
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(isSearching ? Icons.clear : Icons.search),
+                      color: isSearching ? Colors.blue : null,
+                      onPressed: () {
+                        setState(() {
+                          isSearching = !isSearching;
+                          if (!isSearching) {
+                            _searchController.clear();
+                            _filterFiles('');
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+            SizedBox(width: 8),
+            DropdownButton<String>(
+              value: _selectedSortOption,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedSortOption = newValue!;
+                  _sortFiles(newValue);
+                });
+              },
+              items: _sortOptions.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ],
         ),
+        SizedBox(height: 10),
       ],
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _buildPdf(BuildContext context) {
     return Column(
@@ -123,15 +182,7 @@ Future<void> loadDownloadedFiles(Directory directory) async {
           ),
         if (filteredFiles.isNotEmpty)
           Column(
-            children: [
-              Text(
-                'Downloaded Files:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+            children: [  
               SizedBox(height: 10),
               Column(
                 children: filteredFiles.map((file) {
@@ -143,7 +194,7 @@ Future<void> loadDownloadedFiles(Directory directory) async {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
-                        openPdfViewer(context, file);
+                        openPdfViewer(context, file, widget.onFileOpened);
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -169,6 +220,20 @@ Future<void> loadDownloadedFiles(Directory directory) async {
   }
 
 
+void _sortFiles(String option) {
+  setState(() {
+    // Implement sorting logic based on the selected option
+    if (option == 'Date') {
+      // Sort files by date
+      downloadedFiles.sort((a, b) => File(a).lastModifiedSync().compareTo(File(b).lastModifiedSync()));
+    } else if (option == 'Name') {
+      // Sort files by name
+      downloadedFiles.sort((a, b) => a.compareTo(b));
+    }
+    // Update filtered files accordingly
+    _filterFiles(_searchController.text);
+  });
+}
 
   void _filterFiles(String query) {
     setState(() {
@@ -179,27 +244,26 @@ Future<void> loadDownloadedFiles(Directory directory) async {
   }
 }
 
-Future<void> openPdfViewer(BuildContext context, String filePath) async {
-  Navigator.push(
+Future<void> openPdfViewer(BuildContext context, String filePath,
+    Function(String, String) onFileOpened) async {
+  await Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => PDFView(
         filePath: filePath,
-        // Implement additional options if needed
         enableSwipe: true,
         swipeHorizontal: true,
         autoSpacing: true,
         pageSnap: true,
-        onViewCreated: (PDFViewController controller) {
-          // You can use the controller to interact with the PDFView
-        },
-        // onPageChanged: (int page, int total) {
-        //   // Handle page changes if needed
-        // },
+        onViewCreated: (PDFViewController controller) {},
       ),
     ),
   );
+
+  String fileName = filePath.split('/').last;
+  onFileOpened(fileName, filePath);
 }
+
 
 String getFolderName(String path) {
   List<String> parts = path.split('/');

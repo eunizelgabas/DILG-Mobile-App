@@ -64,22 +64,18 @@ class Sidebar extends StatelessWidget {
             _buildSidebarItem(Icons.people, 'Developers', 9, context),
             Divider(color: Colors.white),
           _buildSidebarItem(Icons.exit_to_app, 'Logout', 10, context, onPressed: () async {
-              try {
-                // Call the logout method (assuming you've implemented it)
-                await AuthServices.logout();
-
-                // Clear the stored token
-                await clearToken();
-
-                // Navigate to the login screen
-                Navigator.pushReplacementNamed(context, '/login');
-              } catch (error) {
-                print('Error during logout: $error');
-                // Handle the error, if any
-              }
-            }),
-
-
+            try {
+              // Call the logout method (assuming you've implemented it)
+              await AuthServices.logout();
+              // Clear the stored token
+              await clearToken();
+              // Navigate to the login screen and remove all previous routes
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            } catch (error) {
+              print('Error during logout: $error');
+              // Handle the error, if any
+            }
+          }),
           ],
         ),
       ),
