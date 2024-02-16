@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'package:DILGDOCS/screens/joint_circulars.dart';
+import 'package:DILGDOCS/screens/file_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import '../utils/routes.dart';
 import 'sidebar.dart';
 import 'details_screen.dart';
 import 'package:http/http.dart' as http;
@@ -13,15 +12,15 @@ class DraftIssuances extends StatefulWidget {
 }
 
 class _DraftIssuancesState extends State<DraftIssuances> {
-   List<DraftIssuance> _draftIssuances = [];
-    List<DraftIssuance> get draftIssuances => _draftIssuances;
+  List<DraftIssuance> _draftIssuances = [];
+  List<DraftIssuance> get draftIssuances => _draftIssuances;
       
 
-@override
-  void initState() {
-    super.initState();
-    fetchDraftIssuances();
-}
+  @override
+    void initState() {
+      super.initState();
+      fetchDraftIssuances();
+  }
 
   Future<void> fetchDraftIssuances() async {
     final response = await http.get(
@@ -75,15 +74,10 @@ class _DraftIssuancesState extends State<DraftIssuances> {
 
   Widget _buildBody() {
     TextEditingController searchController = TextEditingController();
-
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Filter Category Dropdown
-         
-          // Search Input
           Container(
-            // margin: EdgeInsets.only(top: 4.0),
             padding: EdgeInsets.all(12.0),
             child: TextField(
               controller: searchController,
@@ -96,14 +90,10 @@ class _DraftIssuancesState extends State<DraftIssuances> {
                 ),
               ),
               onChanged: (value) {
-                // Handle search input changes
               },
             ),
-          ), // Adjust the spacing as needed
-
-          // Sample Table Section
+          ), 
           Container(
-            // padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -113,13 +103,8 @@ class _DraftIssuancesState extends State<DraftIssuances> {
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
-                  // Add margin to the left
                   textAlign: TextAlign.left,
-                  // Use the EdgeInsets.only to specify margin for specific sides
-                  // In this case, only the left margin is set to 3.0
-                  // margin: EdgeInsets.only(left: 3.0),
                 ),
-
                 SizedBox(height: 16.0),
                 for (int index = 0; index < _draftIssuances.length; index++)
               InkWell(
@@ -135,7 +120,6 @@ class _DraftIssuancesState extends State<DraftIssuances> {
                     ),
                 child: Card(
                   elevation: 0,
-                 
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -152,24 +136,27 @@ class _DraftIssuancesState extends State<DraftIssuances> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontSize: 12,
                                 ),
                               ),
                               SizedBox(height: 4.0),
                               Text(
                                 'Ref #${_draftIssuances[index].issuance.referenceNo}',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 10,
                                   color: Colors.grey,
                                 ),
                               ),
                               Text(
-                                'Ref #${_draftIssuances[index].responsible_office}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
+                              _draftIssuances[index].responsible_office != 'N/A' ? 
+                              'Responsible Office: ${_draftIssuances[index].responsible_office}' : 
+                              '',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                             ],
                           ),
                         ),
@@ -179,10 +166,10 @@ class _DraftIssuancesState extends State<DraftIssuances> {
                             DateTime.parse(_draftIssuances[index].issuance.date),
                           ),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 10,
+                            fontStyle: FontStyle.italic,
                           ),
-                        ),
-                        
+                        ),   
                       ],
                     ),
                   ),
@@ -197,25 +184,21 @@ class _DraftIssuancesState extends State<DraftIssuances> {
     );
   }
 
- void _navigateToDetailsPage(BuildContext context, DraftIssuance issuance) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => DetailsScreen(
-        title: issuance.issuance.title,
-        content: 'Ref #${issuance.issuance.referenceNo}\n${DateFormat('MMMM dd, yyyy').format(DateTime.parse(issuance.issuance.date))}',
-        pdfUrl: issuance.issuance.urlLink,
-        type: getTypeForDownload(issuance.issuance.type),
-     
+  void _navigateToDetailsPage(BuildContext context, DraftIssuance issuance) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailsScreen(
+          title: issuance.issuance.title,
+          content: 'Ref #${issuance.issuance.referenceNo}\n${DateFormat('MMMM dd, yyyy').format(DateTime.parse(issuance.issuance.date))}',
+          pdfUrl: issuance.issuance.urlLink,
+          type: getTypeForDownload(issuance.issuance.type),
+      
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
-  // void _navigateToSelectedPage(BuildContext context, int index) {
-  //   // Handle navigation if needed
-  // }
 }
 class DraftIssuance {
    final int id;
@@ -269,4 +252,3 @@ class Issuance {
     );
   }
 }
-

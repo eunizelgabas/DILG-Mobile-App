@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:DILGDOCS/screens/draft_issuances.dart';
+import 'package:DILGDOCS/screens/file_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import '../utils/routes.dart';
@@ -19,11 +21,11 @@ class _JointCircularsState extends State<JointCirculars> {
 @override
   void initState() {
     super.initState();
-    fetchLatestIssuances();
+    fetchJointCirculars();
   }
 
 
- Future<void> fetchLatestIssuances() async {
+ Future<void> fetchJointCirculars() async {
     final response = await http.get(
       Uri.parse('https://issuances.dilgbohol.com/api/joint_circulars'),
       headers: {
@@ -107,19 +109,7 @@ class _JointCircularsState extends State<JointCirculars> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Joint Circulars',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  // Add margin to the left
-                  textAlign: TextAlign.left,
-                  // Use the EdgeInsets.only to specify margin for specific sides
-                  // In this case, only the left margin is set to 3.0
-                  // margin: EdgeInsets.only(left: 3.0),
-                ),
-
+               
                 SizedBox(height: 16.0),
                 for (int index = 0; index < _jointCirculars.length; index++)
               InkWell(
@@ -153,24 +143,27 @@ class _JointCircularsState extends State<JointCirculars> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontSize: 12,
                                 ),
                               ),
                               SizedBox(height: 4.0),
                               Text(
-                                'Ref #${_jointCirculars[index].issuance.referenceNo}',
+                                'Ref #: ${_jointCirculars[index].issuance.referenceNo}',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 10,
                                   color: Colors.grey,
                                 ),
                               ),
                               Text(
-                                'Ref #${_jointCirculars[index].responsible_office}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
+                              _jointCirculars[index].responsible_office != 'N/A' ? 
+                              'Responsible Office: ${_jointCirculars[index].responsible_office}' : 
+                              '',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                             ],
                           ),
                         ),
@@ -180,7 +173,8 @@ class _JointCircularsState extends State<JointCirculars> {
                             DateTime.parse(_jointCirculars[index].issuance.date),
                           ),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 10,
+                             fontStyle: FontStyle.italic,
                           ),
                         ),
                         
@@ -270,28 +264,5 @@ class Issuance {
       urlLink: json['url_link'],
       type: json['type']
     );
-  }
-}
-
-String getTypeForDownload(String issuanceType) {
-  // Map issuance types to corresponding download types
-  switch (issuanceType) {
-    case 'Latest Issuance':
-      return 'Latest Issuance';
-    case 'Joint Circulars':
-      return 'Joint Circulars';
-    case 'Memo Circulars':
-      return 'Memo Circulars';
-     case 'Presidential Directives':
-      return 'Presidential Directives';  
-     case 'Draft Issuances':
-      return 'Draft Issuances';  
-     case 'Republic Acts':
-      return 'Republic Acts';  
-     case 'Legal Opinions':
-      return 'Legal Opinions';  
-  
-    default:
-      return 'Other';
   }
 }

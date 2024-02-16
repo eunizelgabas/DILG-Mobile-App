@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:DILGDOCS/screens/draft_issuances.dart';
+import 'package:DILGDOCS/screens/file_utils.dart';
 import 'package:DILGDOCS/screens/joint_circulars.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +16,9 @@ class MemoCirculars extends StatefulWidget {
 }
 
 class _MemoCircularsState extends State<MemoCirculars> {
-      List<MemoCircular> _memoCirculars = [];
-      List<MemoCircular> get memoCirculars => _memoCirculars;
+    List<MemoCircular> _memoCirculars = [];
+    List<MemoCircular> get memoCirculars => _memoCirculars;
+      
  
 @override
   void initState() {
@@ -109,18 +111,6 @@ class _MemoCircularsState extends State<MemoCirculars> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Memo Circulars',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  // Add margin to the left
-                  textAlign: TextAlign.left,
-                  // Use the EdgeInsets.only to specify margin for specific sides
-                  // In this case, only the left margin is set to 3.0
-                  // margin: EdgeInsets.only(left: 3.0),
-                ),
 
                 SizedBox(height: 16.0),
                 for (int index = 0; index < _memoCirculars.length; index++)
@@ -128,13 +118,6 @@ class _MemoCircularsState extends State<MemoCirculars> {
                onTap: () {
                   _navigateToDetailsPage(context, _memoCirculars[index]);
                 },
-                // child: Container(
-                //     decoration: BoxDecoration(
-                //       border: Border(
-                //         bottom:
-                //             BorderSide(color: const Color.fromARGB(255, 203, 201, 201), width: 1.0),
-                //       ),
-                //     ),
                 child: Card(
                   elevation: 0,
                   child: Column(
@@ -147,26 +130,30 @@ class _MemoCircularsState extends State<MemoCirculars> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 12,
                           ),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Ref #${_memoCirculars[index].issuance.referenceNo}',
+                              'Ref #: ${_memoCirculars[index].issuance.referenceNo}',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 10,
                                 color: Colors.grey,
                               ),
                             ),
-                            Text(
-                              'Ref #${_memoCirculars[index].responsible_office}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
+                           Text(
+                            _memoCirculars[index].responsible_office != 'N/A' ? 
+                              'Responsible Office: ${_memoCirculars[index].responsible_office}' : 
+                              '',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                              overflow: TextOverflow.ellipsis,
                             ),
+                          ),
+
                           ],
                         ),
                         trailing: Text(
@@ -174,7 +161,8 @@ class _MemoCircularsState extends State<MemoCirculars> {
                             DateTime.parse(_memoCirculars[index].issuance.date),
                           ),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 10,
+                            fontStyle: FontStyle.italic,
                           ),
                         ),
                       ),

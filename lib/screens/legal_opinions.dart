@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:DILGDOCS/screens/details_screen.dart';
 import 'package:DILGDOCS/screens/draft_issuances.dart';
+import 'package:DILGDOCS/screens/file_utils.dart';
 import 'package:DILGDOCS/screens/joint_circulars.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'sidebar.dart';
-import 'details_screen.dart';
+
 import 'package:http/http.dart' as http;
 
 class LegalOpinions extends StatefulWidget {
@@ -111,13 +113,7 @@ class _LegalOpinionsState extends State<LegalOpinions> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Legal Opinions',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+               
                 SizedBox(height: 16.0),
                 for (int index = 0; index < _legalOpinions.length; index++)
                   InkWell(
@@ -151,16 +147,16 @@ class _LegalOpinionsState extends State<LegalOpinions> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontSize: 12,
                                 ),
                               ),
                             ),
                             SizedBox(height: 4.0),
 
                             Text(
-                              'Ref #${_legalOpinions[index].issuance.referenceNo}',
+                              'Ref #: ${_legalOpinions[index].issuance.referenceNo}',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 10,
                                 color: Colors.grey,
                               ),
                             ),
@@ -171,7 +167,8 @@ class _LegalOpinionsState extends State<LegalOpinions> {
                                     _legalOpinions[index].issuance.date),
                               ),
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 10,
+                                 fontStyle: FontStyle.italic,
                               ),
                             ),
                           ],
@@ -196,7 +193,7 @@ class _LegalOpinionsState extends State<LegalOpinions> {
         title: issuance.issuance.title,
         content: 'Ref #${issuance.issuance.referenceNo}\n${DateFormat('MMMM dd, yyyy').format(DateTime.parse(issuance.issuance.date))}',
         pdfUrl: issuance.issuance.urlLink, 
-         type: getTypeForDownload(issuance.issuance.type),
+         type: getTypeForDownload(issuance.issuance.type)
        
       ),
     ),
