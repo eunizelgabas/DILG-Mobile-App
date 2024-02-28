@@ -1,105 +1,33 @@
 import 'dart:io';
 import 'package:DILGDOCS/screens/pdf_preview.dart';
+import 'package:DILGDOCS/screens/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
-class Issuance {
-  final String title;
-  final String content;
-  final String pdfUrl;
-
-  Issuance({
-    required this.title,
-    required this.content,
-    required this.pdfUrl,
-  });
-
-  factory Issuance.fromJson(Map<String, dynamic> json) {
-    return Issuance(
-      title: json['title'] ?? '',
-      content: json['content'] ?? '',
-      pdfUrl: json['pdf_url'] ?? '',
-    );
-  }
-}
 
 class DetailsScreen extends StatelessWidget {
-  final String title;
-  final String content;
-  final String pdfUrl;
-  final String type; // Add type parameter
+  final SearchResult searchResult;
 
-  const DetailsScreen({
-    required this.title,
-    required this.content,
-    required this.pdfUrl,
-    required this.type,
-     // Add this line
-  });
+  const DetailsScreen({required this.searchResult});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          title,
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.blue[900],
+        title: Text(searchResult.title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Colors.black,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 2,
-                      height: 2,
-                    ),
-                    Text(
-                      content,
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            PdfPreview(url: pdfUrl),
-            SizedBox(height: 40),
+            PdfPreview(url: searchResult.pdfUrl),
+            SizedBox(height: 50),
+            // Button to download PDF
             ElevatedButton(
               onPressed: () {
-                downloadAndSavePdf(context, pdfUrl, title);
+                downloadAndSavePdf(context, searchResult.pdfUrl, searchResult.title);
               },
               child: Text('Download PDF'),
             ),
@@ -108,8 +36,62 @@ class DetailsScreen extends StatelessWidget {
       ),
     );
   }
+Widget _buildSearchResults(List<SearchResult> searchResults, String searchInput) {
+  if (searchInput.isEmpty) {
+    return SizedBox.shrink();
+  }
 
-  Future<void> downloadAndSavePdf(
+  return searchResults.isNotEmpty
+      ? SingleChildScrollView(
+          child: Column(
+            children: [
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: searchResults.length,
+                itemBuilder: (context, index) {
+                  final SearchResult result = searchResults[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailsScreen(
+                            searchResult: result,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        result.title,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        )
+      : Center(child: Text('No results found'));
+}
+ 
+Future<void> downloadAndSavePdf(
       BuildContext context, String url, String title) async {
     showDialog(
       context: context,

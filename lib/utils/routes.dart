@@ -36,7 +36,7 @@ class Routes {
               print('File opened: $fileName');
             },
           ),
-      introsection: (context) => IntroSection(),
+      // introsection: (context) => IntroSection(),
       latestIssuances: (context) => LatestIssuances(),
       jointCirculars: (context) => JointCirculars(),
       memoCirculars: (context) => MemoCirculars(),

@@ -1,58 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
+import 'home_screen.dart';
+import 'search_screen.dart';
+import 'library_screen.dart';
+import 'settings_screen.dart';
 
-class BottomNavigation extends StatelessWidget {
+class BottomNavigation extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTabTapped;
 
   const BottomNavigation({
+    Key? key,
     required this.currentIndex,
     required this.onTabTapped,
-  });
+  }) : super(key: key);
+
+  @override
+  _BottomNavigationState createState() => _BottomNavigationState();
+}
+
+class _BottomNavigationState extends State<BottomNavigation> {
+  // Define a list of pages/screens to navigate to
+  final List<Widget> _pages = [
+    HomeScreen(),
+    SearchScreen(),
+    LibraryScreen(
+      onFileOpened: (fileName, filePath) {
+        // Implement your logic when file is opened
+        print('File opened: $fileName');
+      },
+    ),
+    SettingsScreen(
+      userName: 'Bruce Unabia',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      key: UniqueKey(),
       type: BottomNavigationBarType.fixed,
-      currentIndex: currentIndex,
-      onTap: onTabTapped,
-      items: const [
+      selectedItemColor: Colors.white,
+      currentIndex: widget.currentIndex,
+      onTap: (index) {
+        // Update the state to reflect the selected index
+        widget.onTabTapped(index);
+        // Use Navigator to navigate to the selected screen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => _pages[index]),
+        );
+      },
+      items: [
         BottomNavigationBarItem(
-          backgroundColor: Color.fromARGB(255, 3, 80, 162),
-          icon: Icon(
-            Icons.home,
-            size: 25,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.home),
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(
-            Icons.search,
-            size: 25,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.search),
           label: 'Search',
         ),
         BottomNavigationBarItem(
-          icon: Icon(
-            Icons.library_books,
-            size: 25,
-            color: Colors.white,
-          ),
+          icon: Icon(Icons.library_books),
           label: 'Library',
         ),
         BottomNavigationBarItem(
-          icon: Icon(
-            Icons.people,
-            size: 25,
-            color: Colors.white,
-          ),
-          label: 'Profile',
+          icon: Icon(Icons.settings),
+          label: 'Settings',
         ),
       ],
-      backgroundColor: Color.fromARGB(255, 3, 80, 162),
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.white.withOpacity(0.5),
+      backgroundColor: Colors.blue[900],
+    );
+  }
+
+  void navigateToSelectedPage(BuildContext context, int index) {
+    Widget page = _pages[index];
+
+    Navigator.pushReplacement(
+      context,
+      PageTransition(
+        child: page,
+        type: PageTransitionType.fade, // or choose your transition type
+        duration: Duration(milliseconds: 500),
+      ),
     );
   }
 }
