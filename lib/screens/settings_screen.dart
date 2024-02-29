@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'change_password_modal.dart';
 import 'edit_user.dart';
 import 'login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'about_screen.dart';
 import 'developers_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'change_password_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final String userName;
@@ -135,10 +136,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SizedBox(height: 10.0),
             // Change Password Button
-            InkWell(
+              InkWell(
               onTap: () {
-                // Show the change password modal
-                _showChangePasswordModal(context);
+                // Navigate to the ChangePasswordScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ChangePasswordScreen()),
+                );
               },
               child: Container(
                 padding: EdgeInsets.all(16.0),
@@ -179,7 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // FAQs Button
             InkWell(
               onTap: () {
-                // Handle FAQs button tap
+                _launchURL();
               },
               child: Container(
                 padding: EdgeInsets.all(16.0),
@@ -372,9 +377,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-                _logout(); // Call the updated logout function
+              // onPressed: () {
+              //   Navigator.pop(context); // Close the dialog
+              //   _logout(); // Call the updated logout function
+              // },
+               onPressed: () async {
+                try {
+                  await logout(context); // Call the logout function
+                } catch (error) {
+                  print('Error during logout: $error');
+                  // Handle any errors that occur during logout
+                }
               },
               child: Text('Logout'),
             ),
@@ -384,30 +397,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _logout() async {
-    // Clear user authentication state
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isAuthenticated', false);
+ 
 
-    setState(() {
-      isAuthenticated = false;
-    });
+  // void _logout() async {
+  //   // Clear user authentication state
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.setBool('isAuthenticated', false);
 
-    Navigator.pushReplacementNamed(context, '/login');
-  }
+  //   setState(() {
+  //     isAuthenticated = false;
+  //   });
+    
+  //   Navigator.pushReplacementNamed(context, '/login');
+  // }
+  Future<void> logout(BuildContext context) async {
+  // Clear authentication token from storage
+  await clearAuthToken();
 
-  void _showChangePasswordModal(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Container(
-            width: MediaQuery.of(context).size.width *
-                0.99, // Adjust the width as needed
-            child: ChangePasswordModal(),
-          ),
-        );
-      },
-    );
+  // Navigate to the login screen and remove all previous routes
+  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+}
+
+Future<void> clearAuthToken() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('authToken');
+}
+
+
+  // void _showChangePasswordModal(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         content: Container(
+  //           width: MediaQuery.of(context).size.width *
+  //               0.99, // Adjust the width as needed
+  //           child: ChangePasswordModal(),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+   void _launchURL() async {
+    const url = 'https://dilgbohol.com/faqs'; // Replace this URL with your desired destination URL
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
