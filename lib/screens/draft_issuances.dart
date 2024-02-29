@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:DILGDOCS/Services/globals.dart';
 import 'package:DILGDOCS/models/draft_issuances.dart';
 import 'package:DILGDOCS/screens/file_utils.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'sidebar.dart';
 import 'details_screen.dart';
 import 'package:http/http.dart' as http;
@@ -17,12 +19,71 @@ class _DraftIssuancesState extends State<DraftIssuances> {
   TextEditingController _searchController = TextEditingController();
   List<DraftIssuance> _draftIssuances = [];
   List<DraftIssuance> _filteredDraftIssuances = [];
+  bool _hasInternetConnection = true;
 
   @override
   void initState() {
     super.initState();
-    fetchDraftIssuances();
+    // fetchDraftIssuances();
+     _checkInternetConnection();
+     _loadContentIfConnected();
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none) {
+        setState(() {
+          _hasInternetConnection = false;
+        });
+      } else {
+        _loadContentIfConnected();
+      }
+    });
   }
+
+ Future<void> _loadContentIfConnected() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _hasInternetConnection = true;
+      });
+      // Load your content here
+      fetchDraftIssuances();
+    }
+  }
+
+
+Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        _hasInternetConnection = false;
+      });
+    }
+  }
+
+Future<void> _openWifiSettings() async {
+  const url = 'app-settings:';
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    // Provide a generic message for both Android and iOS users
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Unable to open Wi-Fi settings'),
+          content: Text('Please open your Wi-Fi settings manually via the device settings.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
   Future<void> fetchDraftIssuances() async {
     final response = await http.get(
@@ -64,7 +125,24 @@ class _DraftIssuancesState extends State<DraftIssuances> {
         ),
         backgroundColor: Colors.blue[900],
       ),
-      body: _buildBody(),
+      body: _hasInternetConnection ? _buildBody() : Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'No internet connection',
+                style: TextStyle(fontSize: 20.0),
+              ),
+              SizedBox(height: 10.0),
+              ElevatedButton(
+                onPressed: () {
+                _openWifiSettings();
+                },
+                child: Text('Connect to Internet'),
+              ),
+            ],
+          ),
+        ),
       drawer: Sidebar(
         currentIndex: 1,
         onItemSelected: (index) {

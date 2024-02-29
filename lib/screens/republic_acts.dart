@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:DILGDOCS/Services/globals.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/republic_acts.dart';
 import '../screens/sidebar.dart';
 import '../screens/details_screen.dart';
@@ -17,12 +19,71 @@ class _RepublicActsState extends State<RepublicActs> {
   TextEditingController _searchController = TextEditingController();
   List<RepublicAct> _republicActs = [];
   List<RepublicAct> _filteredRepublicActs = [];
+  bool _hasInternetConnection = true;
 
   @override
   void initState() {
     super.initState();
-    fetchRepublicActs();
+    // fetchRepublicActs();
+     _loadContentIfConnected();
+    _checkInternetConnection();
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none) {
+        setState(() {
+          _hasInternetConnection = false;
+        });
+      } else {
+        _loadContentIfConnected();
+      }
+    });
   }
+
+   Future<void> _loadContentIfConnected() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _hasInternetConnection = true;
+      });
+      // Load your content here
+      fetchRepublicActs();
+    }
+  }
+
+
+Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        _hasInternetConnection = false;
+      });
+    }
+  }
+
+Future<void> _openWifiSettings() async {
+  const url = 'app-settings:';
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    // Provide a generic message for both Android and iOS users
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Unable to open Wi-Fi settings'),
+          content: Text('Please open your Wi-Fi settings manually via the device settings.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
   Future<void> fetchRepublicActs() async {
     final response = await http.get(
@@ -63,7 +124,24 @@ class _RepublicActsState extends State<RepublicActs> {
           ),
         ),
       ),
-      body: _buildBody(),
+     body: _hasInternetConnection ? _buildBody() : Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'No internet connection',
+                style: TextStyle(fontSize: 20.0),
+              ),
+              SizedBox(height: 10.0),
+              ElevatedButton(
+                onPressed: () {
+                _openWifiSettings();
+                },
+                child: Text('Connect to Internet'),
+              ),
+            ],
+          ),
+        ),
       drawer: Sidebar(
         currentIndex: 6,
         onItemSelected: (index) {

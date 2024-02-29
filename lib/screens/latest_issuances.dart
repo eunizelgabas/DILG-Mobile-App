@@ -28,7 +28,7 @@ class _LatestIssuancesState extends State<LatestIssuances> {
   @override
   void initState() {
     super.initState();
-    fetchLatestIssuances();
+    // fetchLatestIssuances();
      _checkInternetConnection();
      _loadContentIfConnected();
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {

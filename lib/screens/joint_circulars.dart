@@ -26,7 +26,8 @@ class _JointCircularsState extends State<JointCirculars> {
   @override
   void initState() {
     super.initState();
-    fetchJointCirculars();
+    // fetchJointCirculars();
+     _checkInternetConnection();
      _loadContentIfConnected();
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
@@ -127,7 +128,7 @@ Future<void> _openWifiSettings() async {
         ),
         backgroundColor: Colors.blue[900],
       ),
-         body: _hasInternetConnection ? _buildBody() : Center(
+        body: _hasInternetConnection ? _buildBody() : Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

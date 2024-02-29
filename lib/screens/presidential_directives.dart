@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:DILGDOCS/Services/globals.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/gestures.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/presidential_directives.dart';
 import '../utils/routes.dart';
 import 'sidebar.dart';
@@ -19,12 +21,71 @@ class _PresidentialDirectivesState extends State<PresidentialDirectives> {
   TextEditingController _searchController = TextEditingController();
   List<PresidentialDirective> _presidentialDirectives = [];
   List<PresidentialDirective> _filteredPresidentialDirectives = [];
+  bool _hasInternetConnection = true;
 
   @override
   void initState() {
     super.initState();
-    fetchPresidentialCirculars();
+    // fetchPresidentialCirculars();
+     _loadContentIfConnected();
+      _checkInternetConnection();
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none) {
+        setState(() {
+          _hasInternetConnection = false;
+        });
+      } else {
+        _loadContentIfConnected();
+      }
+    });
   }
+
+   Future<void> _loadContentIfConnected() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        _hasInternetConnection = true;
+      });
+      // Load your content here
+      fetchPresidentialCirculars();
+    }
+  }
+
+
+Future<void> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        _hasInternetConnection = false;
+      });
+    }
+  }
+
+Future<void> _openWifiSettings() async {
+  const url = 'app-settings:';
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    // Provide a generic message for both Android and iOS users
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Unable to open Wi-Fi settings'),
+          content: Text('Please open your Wi-Fi settings manually via the device settings.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
   Future<void> fetchPresidentialCirculars() async {
     final response = await http.get(
@@ -69,7 +130,24 @@ class _PresidentialDirectivesState extends State<PresidentialDirectives> {
         ),
         backgroundColor: Colors.blue[900],
       ),
-      body: _buildBody(),
+     body: _hasInternetConnection ? _buildBody() : Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'No internet connection',
+                style: TextStyle(fontSize: 20.0),
+              ),
+              SizedBox(height: 10.0),
+              ElevatedButton(
+                onPressed: () {
+                _openWifiSettings();
+                },
+                child: Text('Connect to Internet'),
+              ),
+            ],
+          ),
+        ),
       drawer: Sidebar(
         currentIndex: 1,
         onItemSelected: (index) {
