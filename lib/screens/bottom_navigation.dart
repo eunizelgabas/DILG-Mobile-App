@@ -31,7 +31,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
       },
     ),
     SettingsScreen(
-      userName: 'Bruce Unabia',
+    
     ),
   ];
 

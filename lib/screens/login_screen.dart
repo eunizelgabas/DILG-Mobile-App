@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String passwordError = '';
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+   bool _isLoggingIn = false;
 
   @override
   void initState() {
@@ -27,70 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
     checkLoggedIn(); // Check if user is already logged in when screen initializes
   }
 
-  // checkLoggedIn() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String? authToken = prefs.getString('authToken');
-
-  //   if (authToken != null) {
-  //     // If authToken exists, check if it's valid
-  //     try {
-  //       bool isValid = await AuthServices.validateToken(authToken);
-  //       if (isValid) {
-  //         // Token is valid, navigate to HomeScreen
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(builder: (context) => const HomeScreen()),
-  //         );
-  //       }
-  //     } catch (error) {
-  //       print('Error validating token: $error');
-  //       // Handle token validation error
-  //     }
-  //   }
-  // }
-//   checkLoggedIn() async {
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//   String? authToken = prefs.getString('authToken');
-
-//   if (authToken != null) {
-//     // If authToken exists, navigate to HomeScreen
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(builder: (context) => const HomeScreen()),
-//     );
-//   }
-// }
-
-// Future<void> clearToken() async {
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//   await prefs.remove('authToken');
-// }
-
-// checkLoggedIn() async {
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//   String? authToken = prefs.getString('authToken');
-
-//   if (authToken != null) {
-//     // If authToken exists, check if it's valid
-//     try {
-//       bool isValid = await AuthServices.validateToken(authToken);
-//       if (isValid) {
-//         // Token is valid, navigate to HomeScreen
-//         Navigator.pushReplacement(
-//           context,
-//           MaterialPageRoute(builder: (context) => const HomeScreen()),
-//         );
-//       }
-//     } catch (error) {
-//       // Error occurred while validating token, handle it
-//       print('Error validating token: $error');
-//       await clearToken(); // Clear token in case of error
-//       Navigator.pushReplacementNamed(context, '/login');
-//     }
-//   }
-// }
-
-Future<void> saveAuthToken(String token) async {
+  Future<void> saveAuthToken(String token) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setString('authToken', token);
 }
@@ -122,8 +60,10 @@ void checkLoggedIn() async {
     // No token found, navigate to login screen
   }
 }
-
   loginPressed() async {
+     setState(() {
+      _isLoggingIn = true;
+    });
     if (_emailController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
       try {
         http.Response response = await AuthServices.login(
@@ -158,7 +98,7 @@ void checkLoggedIn() async {
         print("Stack trace: $stackTrace");
         setState(() {
           emailError = '';
-          passwordError = 'An error occurred during login';
+          passwordError = 'Incorrect email or password';
         });
       }
     } else {
@@ -167,6 +107,9 @@ void checkLoggedIn() async {
         passwordError = 'Enter your password';
       });
     }
+     setState(() {
+      _isLoggingIn = false;
+    });
   }
 
   @override
@@ -217,9 +160,13 @@ void checkLoggedIn() async {
                     SizedBox(height: 8),
                     TextFormField(
                       controller: _emailController,
-                      decoration: InputDecoration(labelText: 'Email'),
-                      validator: (_emailController) {
-                        if (_emailController == null || _emailController.isEmpty) {
+                      decoration: InputDecoration(labelText: 'Email',
+                       errorText:
+                        emailError.isNotEmpty ? emailError : null,
+                      ),
+                      
+                     validator: (value) {
+                        if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
                         // Add more complex email validation if needed
@@ -248,10 +195,12 @@ void checkLoggedIn() async {
                           },
                         ),
                         Text('Remember Me'),
-                        Spacer(),
+                         Spacer(),
                         ElevatedButton(
-                          onPressed: loginPressed,
-                          child: Text('Log in'),
+                          onPressed: _isLoggingIn ? null : loginPressed, // Disable button when logging in
+                          child: _isLoggingIn
+                              ? CircularProgressIndicator() // Show spinner while logging in
+                              : Text('Log in'),
                         ),
                       ],
                     ),

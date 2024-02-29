@@ -1,16 +1,15 @@
+import 'package:DILGDOCS/Services/globals.dart';
+import 'package:DILGDOCS/screens/change_password_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'edit_user.dart';
 import 'login_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'about_screen.dart';
 import 'developers_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'change_password_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  final String userName;
-
-  const SettingsScreen({required this.userName});
+  const SettingsScreen();
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -18,6 +17,27 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool isAuthenticated = false;
+  String userName = '';
+  String email = '';
+  String userAvatar = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserInfo();
+  }
+
+  Future<void> _getUserInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool loggedIn = prefs.getBool('isAuthenticated') ?? false;
+    String? name = prefs.getString('userName');
+    String? userEmail = prefs.getString('userEmail');
+    setState(() {
+      isAuthenticated = loggedIn;
+      userName = name ?? '';
+      email = userEmail ?? '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +50,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () {
                 Navigator.pushReplacementNamed(context, '/home');
               },
-              color: Colors.white, // Set the color of the back button
+              color: Colors.white,
             ),
-            SizedBox(
-              width: 8.0,
-            ), // Adjust the spacing between the back button and title
+            SizedBox(width: 8.0),
             Text(
               'Settings',
               style: TextStyle(
@@ -53,6 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildBody() {
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
@@ -66,7 +85,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 CircleAvatar(
                   radius: 50.0,
-                  backgroundImage: AssetImage('assets/bruce.png'),
+                  backgroundImage: userAvatar.isNotEmpty
+                      ? NetworkImage('$baseURL/images/$userAvatar') as ImageProvider
+                      : AssetImage('assets/eula.png'),
                 ),
                 SizedBox(width: 10.0),
                 Column(
@@ -79,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SizedBox(height: 4.0),
                     Text(
-                      widget.userName,
+                      userName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20.0,
@@ -93,11 +114,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // User Profile Button
             InkWell(
               onTap: () {
-                // Navigate to the user profile page (EditUser)
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => EditUser()),
-                );
+                ).then((_) => _getUserInfo()); // Refresh user info when returning from EditUser
               },
               child: Container(
                 padding: EdgeInsets.all(16.0),
@@ -136,8 +156,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SizedBox(height: 10.0),
             // Change Password Button
-              InkWell(
-              onTap: () {
+            InkWell(
+               onTap: () {
                 // Navigate to the ChangePasswordScreen
                 Navigator.push(
                   context,
@@ -182,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SizedBox(height: 10.0),
             // FAQs Button
-            InkWell(
+             InkWell(
               onTap: () {
                 _launchURL();
               },
@@ -225,7 +245,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // About Button
             InkWell(
               onTap: () {
-                // Handle About button tap
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => About()),
@@ -270,7 +289,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Developers Button
             InkWell(
               onTap: () {
-                // Handle Developers button tap
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Developers()),
@@ -315,7 +333,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Logout Button
             InkWell(
               onTap: () {
-                // Handle Logout button tap
                 _showLogoutDialog(context);
               },
               child: Container(
@@ -349,7 +366,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             SizedBox(height: 10.0),
-            // Additional Divider Below Logout
             Divider(
               color: Colors.grey,
               height: 1,
@@ -358,7 +374,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     );
   }
 
@@ -372,22 +387,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog
+                Navigator.pop(context);
               },
               child: Text('Cancel'),
             ),
             TextButton(
-              // onPressed: () {
-              //   Navigator.pop(context); // Close the dialog
-              //   _logout(); // Call the updated logout function
-              // },
-               onPressed: () async {
-                try {
-                  await logout(context); // Call the logout function
-                } catch (error) {
-                  print('Error during logout: $error');
-                  // Handle any errors that occur during logout
-                }
+              onPressed: () {
+                Navigator.pop(context);
+                _logout();
               },
               child: Text('Logout'),
             ),
@@ -397,48 +404,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
- 
+  void _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isAuthenticated', false);
 
-  // void _logout() async {
-  //   // Clear user authentication state
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   prefs.setBool('isAuthenticated', false);
+    setState(() {
+      isAuthenticated = false;
+    });
 
-  //   setState(() {
-  //     isAuthenticated = false;
-  //   });
-    
-  //   Navigator.pushReplacementNamed(context, '/login');
-  // }
-  Future<void> logout(BuildContext context) async {
-  // Clear authentication token from storage
-  await clearAuthToken();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
 
-  // Navigate to the login screen and remove all previous routes
-  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-}
+  
 
-Future<void> clearAuthToken() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('authToken');
-}
-
-
-  // void _showChangePasswordModal(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         content: Container(
-  //           width: MediaQuery.of(context).size.width *
-  //               0.99, // Adjust the width as needed
-  //           child: ChangePasswordModal(),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-   void _launchURL() async {
+    void _launchURL() async {
     const url = 'https://dilgbohol.com/faqs'; // Replace this URL with your desired destination URL
     if (await canLaunch(url)) {
       await launch(url);

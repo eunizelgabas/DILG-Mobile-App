@@ -26,7 +26,8 @@ class _MemoCircularsState extends State<MemoCirculars> {
   @override
   void initState() {
     super.initState();
-    fetchMemoCirculars();
+    // fetchMemoCirculars();
+     _checkInternetConnection();
     _loadContentIfConnected();
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result == ConnectivityResult.none) {
