@@ -125,6 +125,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ElevatedButton(
               onPressed: () {
                 _resetPassword();
+                 Navigator.pushReplacementNamed(context, '/settings');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[900],
