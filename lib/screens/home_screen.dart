@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'search_screen.dart';
+import 'library_screen.dart';
+import 'settings_screen.dart';
 import 'sidebar.dart';
-import 'edit_user.dart';
 import 'bottom_navigation.dart';
 import 'issuance_pdf_screen.dart';
-import 'library_screen.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher package
 
 class Issuance {
   final String title;
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Home',
     'Search',
     'Library',
-    'View Profile',
+    'Setting',
   ];
 
   DateTime? currentBackPressTime;
@@ -40,31 +41,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadRecentIssuances() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String>? recentIssuances = prefs.getStringList('recentIssuances');
-      if (recentIssuances != null) {
-        setState(() {
-          _recentlyOpenedIssuances =
-              recentIssuances.map((title) => Issuance(title: title)).toList();
-        });
-      }
-    } catch (e) {
-      // Handle error while loading recent issuances
-      print('Error loading recent issuances: $e');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? recentIssuances = prefs.getStringList('recentIssuances');
+    if (recentIssuances != null) {
+      setState(() {
+        _recentlyOpenedIssuances =
+            recentIssuances.map((title) => Issuance(title: title)).toList();
+      });
     }
   }
 
   void _saveRecentIssuances() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> titles =
-          _recentlyOpenedIssuances.map((issuance) => issuance.title).toList();
-      await prefs.setStringList('recentIssuances', titles);
-    } catch (e) {
-      // Handle error while saving recent issuances
-      print('Error saving recent issuances: $e');
-    }
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> titles =
+        _recentlyOpenedIssuances.map((issuance) => issuance.title).toList();
+    await prefs.setStringList('recentIssuances', titles);
   }
 
   @override
@@ -140,11 +131,72 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBody() {
     switch (_currentIndex) {
       case 0:
-        return ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            _buildRecentIssuances(),
-          ],
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/dilg-main.png',
+                      width: 60.0,
+                      height: 60.0,
+                    ),
+                    const SizedBox(width: 10.0),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'REPUBLIC OF THE PHILIPPINES',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        Text(
+                          'DEPARTMENT OF THE INTERIOR AND LOCAL GOVERNMENT',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 8,
+                          ),
+                        ),
+                        Text(
+                          'BOHOL PROVINCE',
+                          style: TextStyle(
+                            fontSize: 8,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30.0),
+                _buildWideButton('NEWS AND UPDATES', 'https://dilgbohol.com/news_update'),
+                _buildWideButton(
+                    'THE PROVINCIAL DIRECTOR', 'https://dilgbohol.com/provincial_director'),
+                _buildWideButton('VISION AND MISSION', 'https://dilgbohol.com/about_us'),
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical, // Ensure vertical scrolling
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildRecentIssuances(),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+              ],
+            ),
+          ),
         );
       case 1:
         return SearchScreen();
@@ -153,17 +205,21 @@ class _HomeScreenState extends State<HomeScreen> {
           onFileOpened: (title, subtitle) {
             // Add the opened file to recently opened issuances
             setState(() {
-              _recentlyOpenedIssuances.insert(
-                0,
-                Issuance(title: title),
-              );
+              _recentlyOpenedIssuances.insert(0, Issuance(title: title));
+            });
+          },
+          onFileDeleted: (title) {
+            // Remove the deleted issuance from the list of recently opened issuances
+            setState(() {
+              _recentlyOpenedIssuances
+                  .removeWhere((issuance) => issuance.title == title);
             });
           },
         );
-      case 3:
-        return EditUser();
+        case 3:
+        return SettingsScreen();
       default:
-        return Container();
+        return SizedBox(); // Return an empty widget for unsupported index
     }
   }
 
@@ -174,37 +230,34 @@ class _HomeScreenState extends State<HomeScreen> {
     // Get the first 5 recently opened issuances
     List<Issuance> recentIssuances = _recentlyOpenedIssuances.take(5).toList();
 
-    Widget seeMoreLink = Container(); // Initially, don't show the link
+    // Show the "Clear List" button only if there are recent issuances
+    Widget clearListButton = _recentlyOpenedIssuances.isNotEmpty
+        ? ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _recentlyOpenedIssuances.clear();
+              });
+            },
+            child: Text('Clear List'),
+          )
+        : SizedBox();
 
-    // Show the "See more" link only if there are more than 5 recent issuances
-    if (_recentlyOpenedIssuances.length > 5) {
-      seeMoreLink = GestureDetector(
-        onTap: () {
-          // Navigate to the Library screen
+    // See More Button
+    Widget seeMoreButton = SizedBox();
+    if (_recentlyOpenedIssuances.length > 4) {
+      seeMoreButton = TextButton(
+        onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => LibraryScreen(
-                onFileOpened: (title, subtitle) {
-                  // Add the opened file to recently opened issuances
-                  setState(() {
-                    _recentlyOpenedIssuances.insert(
-                      0,
-                      Issuance(title: title),
-                    );
-                  });
-                },
+                onFileOpened:
+                    (title, subtitle) {}, // Provide dummy function or null
               ),
             ),
           );
         },
-        child: Text(
-          'See more',
-          style: TextStyle(
-            color: Colors.blue, // Set the color to blue
-            decoration: TextDecoration.none, // Remove underline
-          ),
-        ),
+        child: Text('See More'),
       );
     }
 
@@ -213,21 +266,28 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(
-            'Recently Opened Issuances',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recently Opened Issuances',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              // See More Button
+              seeMoreButton,
+            ],
           ),
         ),
-        const SizedBox(height: 16.0),
+        const SizedBox(height: 14.0),
         if (_recentlyOpenedIssuances.isEmpty)
           Center(
             child: Text(
               'No recently opened Issuance/s',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -244,32 +304,37 @@ class _HomeScreenState extends State<HomeScreen> {
               return Column(
                 children: [
                   ListTile(
-                    title: Text(
-                      issuance.title.length > 25
-                          ? '${issuance.title.substring(0, 25)}...' // Display only the first 25 characters
-                          : issuance.title,
-                    ),
-                    trailing: ElevatedButton(
-                      onPressed: () {
-                        // Remove the current issuance from the list
-                        setState(() {
-                          _recentlyOpenedIssuances.remove(issuance);
-                        });
-                        // Add the current issuance to the top of the list
-                        setState(() {
-                          _recentlyOpenedIssuances.insert(0, issuance);
-                        });
-                        // Navigate to the PDF screen when the button is pressed
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => IssuancePDFScreen(
-                              title: issuance.title,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Text('View'),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          issuance.title.length > 15
+                              ? '${issuance.title.substring(0, 15)}...'
+                              : issuance.title,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Remove the current issuance from the list
+                            setState(() {
+                              _recentlyOpenedIssuances.remove(issuance);
+                            });
+                            // Add the current issuance to the top of the list
+                            setState(() {
+                              _recentlyOpenedIssuances.insert(0, issuance);
+                            });
+                            // Navigate to the PDF screen when the button is pressed
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => IssuancePDFScreen(
+                                  title: issuance.title,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text('View'),
+                        ),
+                      ],
                     ),
                   ),
                   const Divider(),
@@ -277,9 +342,56 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             }
           }).toList(),
-          seeMoreLink, // Show the "See more" link
+          clearListButton,
         ],
       ],
     );
+  }
+
+  Widget _buildWideButton(String label, String url) {
+    return GestureDetector(
+      onTap: () {
+        _launchURL(url);
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.blue[600], // Adjust the color as needed
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Function to launch URLs
+  void _launchURL(String url) async {
+    try {
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
+    }
   }
 }

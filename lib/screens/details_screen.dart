@@ -1,5 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
-import 'package:DILGDOCS/screens/pdf_preview.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +26,17 @@ class Issuance {
   }
 }
 
+Future<List<Issuance>> fetchIssuances() async {
+  final response = await http
+      .get(Uri.parse('https://issuances.dilgbohol.com/api/latest_issuances'));
+  if (response.statusCode == 200) {
+    List<dynamic> data = jsonDecode(response.body);
+    return data.map((json) => Issuance.fromJson(json)).toList();
+  } else {
+    throw Exception('Failed to load issuances');
+  }
+}
+
 class DetailsScreen extends StatelessWidget {
   final String title;
   final String content;
@@ -35,8 +47,7 @@ class DetailsScreen extends StatelessWidget {
     required this.title,
     required this.content,
     required this.pdfUrl,
-    required this.type,
-     // Add this line
+    required this.type, // Add this line
   });
 
   @override
@@ -94,9 +105,9 @@ class DetailsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             PdfPreview(url: pdfUrl),
-            SizedBox(height: 40),
+            SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
                 downloadAndSavePdf(context, pdfUrl, title);
@@ -134,7 +145,9 @@ class DetailsScreen extends StatelessWidget {
     try {
       final appDir = await getExternalStorageDirectory();
       final directoryPath = '${appDir!.path}/PDFs';
-      final filePath = '$directoryPath/$title.pdf';
+      final sanitizedTitle = title.replaceAll(
+          '/', '-'); // Replace "/" with "-" in order to download
+      final filePath = '$directoryPath/$sanitizedTitle.pdf';
 
       final file = File(filePath);
       if (await file.exists()) {
@@ -197,6 +210,72 @@ class DetailsScreen extends StatelessWidget {
     } catch (e) {
       print('Error downloading PDF: $e');
       Navigator.of(context).pop(); // Close the loading dialog
+    }
+  }
+}
+
+class PdfPreview extends StatelessWidget {
+  final String url;
+
+  const PdfPreview({Key? key, required this.url}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<File>(
+      future: _loadPdfFromUrl(url),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Previewing PDF...',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error loading PDF: ${snapshot.error}'));
+        } else if (snapshot.hasData) {
+          return Expanded(
+            child: PDFView(
+              filePath: snapshot.data!.path,
+              pageSnap: true,
+              swipeHorizontal: true,
+              autoSpacing: true,
+              pageFling: true,
+              onError: (error) {
+                print('Error loading PDF: $error');
+              },
+            ),
+          );
+        } else {
+          return Center(child: Text('Unknown error occurred'));
+        }
+      },
+    );
+  }
+
+  Future<File> _loadPdfFromUrl(String url) async {
+    final filename = url.split('/').last;
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/$filename';
+    final file = File(filePath);
+
+    if (await file.exists()) {
+      return file;
+    } else {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        await file.writeAsBytes(response.bodyBytes);
+        return file;
+      } else {
+        throw Exception('Failed to load PDF: ${response.statusCode}');
+      }
     }
   }
 }

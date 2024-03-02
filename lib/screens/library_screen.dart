@@ -8,9 +8,13 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:path_provider/path_provider.dart';
 
 class LibraryScreen extends StatefulWidget {
-   final Function(String, String) onFileOpened;
+  final Function(String, String)? onFileOpened;
+  final Function(String)? onFileDeleted;
 
-  LibraryScreen({required this.onFileOpened});
+  LibraryScreen({
+    this.onFileOpened,
+    this.onFileDeleted,
+  });
 
   @override
   _LibraryScreenState createState() => _LibraryScreenState();
@@ -60,48 +64,97 @@ class _LibraryScreenState extends State<LibraryScreen> {
     downloadedFiles.sort();
   }
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text(
-        'Library',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // appBar: AppBar(
+      //   title: Text(
+      //     'Library',
+      //     style: TextStyle(
+      //       fontWeight: FontWeight.bold,
+      //       color: Colors.white,
+      //     ),
+      //   ),
+      //   leading: Builder(
+      //     builder: (context) => IconButton(
+      //       icon: Icon(Icons.menu, color: Colors.white),
+      //       onPressed: () => Scaffold.of(context).openDrawer(),
+      //     ),
+      //   ),
+      //   backgroundColor: Colors.blue[900],
+      // ),
+      drawer: Sidebar(
+        currentIndex: 0,
+        onItemSelected: (index) {
+          _navigateToSelectedPage(context, index);
+        },
+      ),
+      // bottomNavigationBar: BottomNavigation(
+      //   currentIndex: 2,
+      //   onTabTapped: (index) {
+      //     // Handle bottom navigation item taps if needed
+      //   },
+      // ),
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.only(top: 16.0), // Add margin top here
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildSearchAndFilterRow(),
+              _buildPdf(context),
+            ],
+          ),
         ),
       ),
-      leading: Builder(
-        builder: (context) => IconButton(
-          icon: Icon(Icons.menu, color: Colors.white),
-          onPressed: () => Scaffold.of(context).openDrawer(),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      child: Expanded(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search...',
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (value) {
+                      _filterFiles(value);
+                    },
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.search),
+                onPressed: () {
+                  _filterFiles(_searchController.text);
+                },
+              ),
+            ],
+          ),
         ),
       ),
-      backgroundColor: Colors.blue[900],
-    ),
-    drawer: Sidebar(
-      currentIndex: 0,
-      onItemSelected: (index) {
-        _navigateToSelectedPage(context, index);
-      },
-    ),
-    bottomNavigationBar: BottomNavigation(
-      currentIndex: 2,
-      onTabTapped: (index) {
-        // Handle bottom navigation item taps if needed
-      },
-    ),
-    body: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSearchAndFilterRow(),
-          _buildPdf(context),
-        ],
-      ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildSearchAndFilterRow() {
     return Padding(
@@ -111,71 +164,14 @@ Widget build(BuildContext context) {
         children: [
           Row(
             children: [
-              Expanded(
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  width:
-                      isSearching ? MediaQuery.of(context).size.width - 96 : 48,
-                  decoration: BoxDecoration(
-                    color: isSearching ? Colors.grey[200] : null,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Visibility(
-                          visible: isSearching,
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (value) {
-                              _filterFiles(value);
-                            },
-                            decoration: InputDecoration(
-                              hintText: 'Search...',
-                              border: InputBorder.none,
-                              prefixIcon: Icon(Icons.search),
-                            ),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(isSearching ? Icons.clear : Icons.search),
-                        color: isSearching ? Colors.blue : null,
-                        onPressed: () {
-                          setState(() {
-                            isSearching = !isSearching;
-                            if (!isSearching) {
-                              _searchController.clear();
-                              _filterFiles('');
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              DropdownButton<String>(
-                value: _selectedSortOption,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedSortOption = newValue!;
-                    _sortFiles(newValue);
-                  });
-                },
-                items:
-                    _sortOptions.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
+              _buildSearchBar(),
+              SizedBox(
+                width: 10,
+              ), // Add spacing between search bar and other widgets
+              // Add other widgets here
             ],
           ),
-          SizedBox(height: 10),
+          // Add other rows or widgets as needed
         ],
       ),
     );
@@ -231,7 +227,7 @@ Widget build(BuildContext context) {
                                 Icons.picture_as_pdf,
                                 color: Colors.blue,
                               ),
-                              SizedBox(width: 8),
+                              SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   file.split('/').last,
@@ -252,7 +248,12 @@ Widget build(BuildContext context) {
                         ],
                       ),
                       onTap: () {
-                        openPdfViewer(context, file, widget.onFileOpened);
+                        openPdfViewer(
+                          context,
+                          file,
+                          widget.onFileOpened ??
+                              (String fileName, String filePath) {},
+                        );
                       },
                     ),
                   );
@@ -319,6 +320,9 @@ Widget build(BuildContext context) {
       downloadedFiles.remove(filePath);
       filteredFiles.remove(filePath);
 
+      // Call the callback function provided by HomeScreen
+      widget.onFileDeleted?.call(filePath.split('/').last);
+
       // Show a confirmation dialog
       showDialog(
         context: context,
@@ -363,38 +367,28 @@ Widget build(BuildContext context) {
       );
     }
   }
-}
 
- void _navigateToSelectedPage(BuildContext context, int index) {
+  void _navigateToSelectedPage(BuildContext context, int index) {
     // Handle navigation to selected page
   }
-Future<void> openPdfViewer(BuildContext context, String filePath,
-    Function(String, String) onFileOpened) async {
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => PDFView(
-        filePath: filePath,
-        enableSwipe: true,
-        swipeHorizontal: true,
-        autoSpacing: true,
-        pageSnap: true,
-        onViewCreated: (PDFViewController controller) {},
+
+  Future<void> openPdfViewer(BuildContext context, String filePath,
+      Function(String, String) onFileOpened) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PDFView(
+          filePath: filePath,
+          enableSwipe: true,
+          swipeHorizontal: true,
+          autoSpacing: true,
+          pageSnap: true,
+          onViewCreated: (PDFViewController controller) {},
+        ),
       ),
-    ),
-  );
+    );
 
-  String fileName = filePath.split('/').last;
-  onFileOpened(fileName, filePath);
-}
-
-String getFolderName(String path) {
-  List<String> parts = path.split('/');
-  if (parts.length > 1) {
-    String folder = parts[parts.length - 2];
-    print('Folder name extracted: $folder');
-    return folder;
+    String fileName = filePath.split('/').last;
+    onFileOpened(fileName, filePath);
   }
-  print('No folder name found in path: $path');
-  return 'Other';
 }

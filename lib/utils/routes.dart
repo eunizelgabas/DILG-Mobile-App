@@ -9,7 +9,6 @@ import '../screens/republic_acts.dart';
 import '../screens/home_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/library_screen.dart';
-import '../screens/intro_section.dart';
 import '../screens/login_screen.dart';
 import '../screens/edit_user.dart';
 import '../screens/change_password_screen.dart';
@@ -36,10 +35,14 @@ class Routes {
     return {
       home: (context) => const HomeScreen(),
       search: (context) => SearchScreen(),
-      library: (context) => LibraryScreen(
+      'library': (context) => LibraryScreen(
             onFileOpened: (fileName, filePath) {
               // Implement your logic when file is opened
               print('File opened: $fileName');
+            },
+            onFileDeleted: (filePath) {
+              // Implement your logic when file is deleted
+              print('File deleted: $filePath');
             },
           ),
       // introsection: (context) => IntroSection(),

@@ -186,15 +186,15 @@ void checkLoggedIn() async {
                     SizedBox(height: 8),
                     Row(
                       children: [
-                        Checkbox(
-                          value: rememberMe,
-                          onChanged: (value) {
-                            setState(() {
-                              rememberMe = value!;
-                            });
-                          },
-                        ),
-                        Text('Remember Me'),
+                        // Checkbox(
+                        //   value: rememberMe,
+                        //   onChanged: (value) {
+                        //     setState(() {
+                        //       rememberMe = value!;
+                        //     });
+                        //   },
+                        // ),
+                        // Text('Remember Me'),
                          Spacer(),
                         ElevatedButton(
                           onPressed: _isLoggingIn ? null : loginPressed, // Disable button when logging in
@@ -202,7 +202,9 @@ void checkLoggedIn() async {
                               ? CircularProgressIndicator() // Show spinner while logging in
                               : Text('Log in'),
                         ),
+                     
                       ],
+                      
                     ),
                   ],
                 ),

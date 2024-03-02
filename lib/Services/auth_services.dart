@@ -74,17 +74,20 @@ class AuthServices {
         await prefs.setInt('userId', user['id']);
         await prefs.setString('userName', user['name']);
         await prefs.setString('userEmail', user['email']);
-        await prefs.setString('userAvatar', user['avatar']); // Store user's avatar URL
-        var avatarUrl = user['avatar'];
-        var avatarResponse = await http.get(Uri.parse(avatarUrl));
-        if (avatarResponse.statusCode == 200) {
-          var appDir = await getApplicationDocumentsDirectory();
-          var avatarFile = File('${appDir.path}/avatar.jpg');
-          await avatarFile.writeAsBytes(avatarResponse.bodyBytes);
-          print('Avatar downloaded and stored locally');
-        } else {
-          print('Failed to download avatar image');
-        }
+      await prefs.setString('userAvatar', user['avatar']); // Store user's avatar URL
+      
+      // Fetch the avatar image
+      var avatarUrl = user['avatar'];
+      var avatarResponse = await http.get(Uri.parse(avatarUrl));
+      if (avatarResponse.statusCode == 200) {
+        // Save avatar image to local storage
+        var appDir = await getApplicationDocumentsDirectory();
+        var avatarFile = File('${appDir.path}/avatar.jpg');
+        await avatarFile.writeAsBytes(avatarResponse.bodyBytes);
+        print('Avatar downloaded and stored locally');
+      } else {
+        print('Failed to download avatar image');
+      }
       } else {
         print('Failed to fetch user details: ${response.statusCode}');
       }

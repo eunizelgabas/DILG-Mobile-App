@@ -1,6 +1,11 @@
+import 'package:DILGDOCS/screens/bottom_navigation.dart';
+import 'package:DILGDOCS/screens/home_screen.dart';
+import 'package:DILGDOCS/screens/library_screen.dart';
+import 'package:DILGDOCS/screens/login_screen.dart';
+import 'package:DILGDOCS/screens/search_screen.dart';
+import 'package:DILGDOCS/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import '../utils/routes.dart';
-import '../screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,18 +18,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'DILG Bohol',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         useMaterial3: true,
       ),
-      // initialRoute: Routes.introsection, // Set the initial route
       initialRoute: Routes.login,
+      // routes: Routes.getRoutes(context),
+      // home: BottomNavigationPage(), 
       routes: Routes.getRoutes(context),
-      onGenerateRoute: (settings) {
-        // Handle unknown routes, such as pressing the back button
-        return MaterialPageRoute(builder: (context) => const HomeScreen());
-      },
+
+      
+     // onGenerateRoute: (settings) {
+      //   // Handle unknown routes, such as pressing the back button
+      //   return MaterialPageRoute(builder: (context) => const HomeScreen());
+      // },
     );
   }
+  
 }
