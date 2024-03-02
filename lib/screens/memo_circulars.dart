@@ -120,12 +120,10 @@ Future<void> _openWifiSettings() async {
             color: Colors.white,
           ),
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: Colors.white),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+       iconTheme: IconThemeData(
+          color: Colors.white,
         ),
+       
         backgroundColor: Colors.blue[900],
       ),
       body: _hasInternetConnection ? _buildBody() : Center(
@@ -146,12 +144,12 @@ Future<void> _openWifiSettings() async {
             ],
           ),
         ),
-      drawer: Sidebar(
-        currentIndex: 1,
-        onItemSelected: (index) {
-          _navigateToSelectedPage(context, index);
-        },
-      ),
+      // drawer: Sidebar(
+      //   currentIndex: 1,
+      //   onItemSelected: (index) {
+      //     _navigateToSelectedPage(context, index);
+      //   },
+      // ),
     );
   }
 

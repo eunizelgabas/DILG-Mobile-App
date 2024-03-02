@@ -115,14 +115,13 @@ Future<void> _openWifiSettings() async {
           'Republic Acts',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: Colors.blue[900]),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+        iconTheme: IconThemeData(
+          color: Colors.white,
         ),
+        backgroundColor: Colors.blue[900],
       ),
      body: _hasInternetConnection ? _buildBody() : Center(
           child: Column(
@@ -142,12 +141,7 @@ Future<void> _openWifiSettings() async {
             ],
           ),
         ),
-      drawer: Sidebar(
-        currentIndex: 6,
-        onItemSelected: (index) {
-          Navigator.pop(context);
-        },
-      ),
+      
     );
   }
 

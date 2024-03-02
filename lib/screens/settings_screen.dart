@@ -102,7 +102,7 @@ Future<void> fetchUserDetails() async {
                   children: [
                     SizedBox(height: 25.0),
                     Text(
-                      'Welcome',
+                      'Welcome,',
                       style: TextStyle(color: Colors.grey),
                     ),
                     SizedBox(height: 4.0),

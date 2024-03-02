@@ -1,15 +1,12 @@
 import 'dart:convert';
 import 'package:DILGDOCS/Services/globals.dart';
 import 'package:DILGDOCS/models/legal_opinions.dart';
-import 'package:DILGDOCS/screens/draft_issuances.dart';
 import 'package:DILGDOCS/screens/file_utils.dart';
-import 'package:DILGDOCS/screens/joint_circulars.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'sidebar.dart';
 import 'details_screen.dart';
 import 'package:http/http.dart' as http;
 
@@ -118,14 +115,13 @@ Future<void> _openWifiSettings() async {
           'Legal Opinions',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: Colors.blue[900]),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+        iconTheme: IconThemeData(
+          color: Colors.white,
         ),
+        backgroundColor: Colors.blue[900],
       ),
        body: _hasInternetConnection ? _buildBody() : Center(
           child: Column(
@@ -145,12 +141,7 @@ Future<void> _openWifiSettings() async {
             ],
           ),
         ),
-      drawer: Sidebar(
-        currentIndex: 7,
-        onItemSelected: (index) {
-          Navigator.pop(context);
-        },
-      ),
+     
     );
   }
 

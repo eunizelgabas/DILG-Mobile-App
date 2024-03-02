@@ -6,7 +6,6 @@ import 'package:connectivity/connectivity.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'sidebar.dart';
 import 'details_screen.dart';
 import 'package:http/http.dart' as http;
 
@@ -117,11 +116,8 @@ Future<void> _openWifiSettings() async {
             color: Colors.white,
           ),
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: Colors.white),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+        iconTheme: IconThemeData(
+          color: Colors.white,
         ),
         backgroundColor: Colors.blue[900],
       ),
@@ -143,12 +139,7 @@ Future<void> _openWifiSettings() async {
             ],
           ),
         ),
-      drawer: Sidebar(
-        currentIndex: 1,
-        onItemSelected: (index) {
-          // _navigateToSelectedPage(context, index);
-        },
-      ),
+      
     );
   }
 
