@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'sidebar.dart';
 
 class About extends StatelessWidget {
   @override
@@ -10,22 +9,15 @@ class About extends StatelessWidget {
           'About',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: Icon(Icons.menu, color: Colors.blue[900]),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+         iconTheme: IconThemeData(
+          color: Colors.white,
         ),
+        backgroundColor: Colors.blue[900],
       ),
-      drawer: Sidebar(
-        currentIndex: 1,
-        onItemSelected: (index) {
-          // Handle item selection if needed
-          _navigateToSelectedPage(context, index);
-        },
-      ),
+    
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
