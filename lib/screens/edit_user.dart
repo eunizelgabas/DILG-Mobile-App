@@ -56,7 +56,7 @@ class _EditUserState extends State<EditUser> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'View Profile',
+          'User Information',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,

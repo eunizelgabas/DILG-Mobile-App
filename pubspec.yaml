@@ -80,6 +80,13 @@ flutter:
     - assets/lyod.png
     - assets/bruce.png
     - assets/mdc-logo.png
+    - assets/default.png
+    - assets/pic 1.png
+    - assets/pic 2.png
+    - assets/pic 3.png
+    - assets/girl 1.png
+    - assets/girl 2.png
+    - assets/girl 3.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
