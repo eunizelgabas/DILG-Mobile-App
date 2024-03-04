@@ -218,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         case 3:
         return SettingsScreen();
+        
       default:
         return SizedBox(); // Return an empty widget for unsupported index
     }

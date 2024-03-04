@@ -1,9 +1,9 @@
+import 'package:DILGDOCS/utils/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:connectivity/connectivity.dart';
-import 'package:DILGDOCS/Services/auth_services.dart';
+import '../Services/auth_services.dart';
 
 class EditUser extends StatefulWidget {
   @override
@@ -13,8 +13,9 @@ class EditUser extends StatefulWidget {
 class _EditUserState extends State<EditUser> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
-  File? _userImage;
+  Widget? _userImage;
   bool isAuthenticated = false;
+  String? _selectedAvatarPath;
 
   @override
   void initState() {
@@ -27,10 +28,12 @@ class _EditUserState extends State<EditUser> {
     bool loggedIn = prefs.getBool('isAuthenticated') ?? false;
     String? name = prefs.getString('userName');
     String? email = prefs.getString('userEmail');
+    String? selectedAvatarPath = prefs.getString('selectedAvatarPath');
     setState(() {
       isAuthenticated = loggedIn;
       _nameController.text = name ?? '';
       _emailController.text = email ?? '';
+      _selectedAvatarPath = selectedAvatarPath;
     });
   }
 
@@ -41,14 +44,47 @@ class _EditUserState extends State<EditUser> {
     super.dispose();
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final pickedImage = await ImagePicker().pickImage(source: source);
+  Future<void> _pickImageFromAssets() async {
+    List<String> assetImages = [
+      'assets/girl 1.png',
+      'assets/girl 2.png',
+      'assets/girl 3.png',
+      'assets/pic 1.png',
+      'assets/pic 2.png',
+      'assets/pic 3.png',
+    ];
 
-    if (pickedImage != null) {
-      setState(() {
-        _userImage = File(pickedImage.path);
-      });
-    }
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 250,
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 5.0,
+              crossAxisSpacing: 5.0,
+            ),
+            itemCount: assetImages.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedAvatarPath = assetImages[index];
+                  });
+                  Navigator.pop(context);
+                  updateAvatar(assetImages[index]); // Update avatar in SharedPreferences
+                },
+                child: Image.asset(
+                  assetImages[index],
+                  fit: BoxFit.cover,
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -56,7 +92,7 @@ class _EditUserState extends State<EditUser> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'User Information',
+          'View Profile',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -76,22 +112,23 @@ class _EditUserState extends State<EditUser> {
               SizedBox(height: 16),
               GestureDetector(
                 onTap: () {
-                  _pickImage(ImageSource.gallery);
+                  _pickImageFromAssets();
                 },
                 child: Container(
                   width: 130,
                   height: 130,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue[900],
-                    image: _userImage != null
+                    color: Colors.grey,
+                    image: _selectedAvatarPath != null
                         ? DecorationImage(
-                            image: FileImage(_userImage!),
-                            fit: BoxFit.cover,
+                            image: AssetImage(_selectedAvatarPath!),
+                            fit: BoxFit
+                                .contain, // Use BoxFit.contain to fit the image within the container
                           )
                         : null,
                   ),
-                  child: _userImage == null
+                  child: _selectedAvatarPath == null
                       ? Icon(
                           Icons.person,
                           color: Colors.white,
@@ -110,6 +147,48 @@ class _EditUserState extends State<EditUser> {
                   String newName = _nameController.text;
                   String newEmail = _emailController.text;
                   _updateNameAndEmail(newName, newEmail);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                color: Colors.green[300],
+                                size: 40,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Profile Updated',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushReplacementNamed(
+                                      context, '/home');
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue[300],
+                                ),
+                                child: Text('OK'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[900],
@@ -151,13 +230,12 @@ class _EditUserState extends State<EditUser> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('No Internet Connection'),
-            content:
-                Text('Please connect to the internet to update profile.'),
+            content: Text('Please connect to the internet to update profile.'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                   Navigator.pushReplacementNamed(context, '/settings');
+                  Navigator.pushReplacementNamed(context, '/settings');
                 },
                 child: Text('OK'),
               ),
@@ -167,8 +245,10 @@ class _EditUserState extends State<EditUser> {
       );
       return;
     }
-    
+
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('selectedAvatarPath', _selectedAvatarPath ?? '');
       String? token = await AuthServices.getToken();
       if (token != null) {
         await AuthServices.updateUserNameAndEmail(token, newName, newEmail);
@@ -199,14 +279,12 @@ class _EditUserState extends State<EditUser> {
                     ),
                     SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pushReplacementNamed(context, '/settings');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[300],
-                      ),
-                      child: Text('OK'),
+                    onPressed: () {
+                      Navigator.pop(context); // Close the EditUser screen
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, Routes.home, (route) => false); // Navigate to the Settings screen
+                    },
+                    child: Text('OK'),
                     ),
                   ],
                 ),
@@ -220,5 +298,10 @@ class _EditUserState extends State<EditUser> {
     } catch (error) {
       print('Error updating profile: $error');
     }
+  }
+
+  void updateAvatar(String newAvatarUrl) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('userAvatar', newAvatarUrl);
   }
 }
