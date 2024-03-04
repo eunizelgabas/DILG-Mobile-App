@@ -58,34 +58,53 @@ class _EditUserState extends State<EditUser> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 250,
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 5.0,
-              crossAxisSpacing: 5.0,
-            ),
-            itemCount: assetImages.length,
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedAvatarPath = assetImages[index];
-                  });
-                  Navigator.pop(context);
-                  updateAvatar(assetImages[index]); // Update avatar in SharedPreferences
-                },
-                child: Image.asset(
-                  assetImages[index],
-                  fit: BoxFit.cover,
+          height: 310,
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                child: Text(
+                  'Select Avatar',
+                  style: TextStyle(
+                    fontSize: 21.0,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              );
-            },
+              ),
+              SizedBox(height: 10.0),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 5.0,
+                    crossAxisSpacing: 5.0,
+                  ),
+                  itemCount: assetImages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedAvatarPath = assetImages[index];
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Image.asset(
+                        assetImages[index],
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -235,8 +254,9 @@ class _EditUserState extends State<EditUser> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.pushReplacementNamed(context, '/settings');
-                },
+                 Navigator.pushNamedAndRemoveUntil(
+                          context, Routes.home, (route) => false); // Navigate to the Settings screen
+                    },
                 child: Text('OK'),
               ),
             ],
