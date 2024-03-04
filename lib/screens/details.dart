@@ -15,8 +15,20 @@ class DetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(searchResult.title),
+        title: Text(
+          searchResult.title,
+          style: TextStyle(color: Colors.white),
+        ),
+         leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          color: Colors.white,
+        ),
+        backgroundColor: Colors.blue[900],
       ),
+      
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

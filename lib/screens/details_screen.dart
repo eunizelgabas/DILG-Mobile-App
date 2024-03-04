@@ -57,8 +57,17 @@ class DetailsScreen extends StatelessWidget {
         title: Text(
           title,
           style: TextStyle(color: Colors.white),
+          
+        ),
+         leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          color: Colors.white,
         ),
         backgroundColor: Colors.blue[900],
+       
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
