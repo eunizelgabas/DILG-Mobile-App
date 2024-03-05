@@ -69,7 +69,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? selectedAvatarPath = prefs.getString('selectedAvatarPath');
     setState(() {
-      _selectedAvatarPath = selectedAvatarPath ?? '';
+      _selectedAvatarPath = selectedAvatarPath ?? 'assets/default.png';
     });
   }
 
