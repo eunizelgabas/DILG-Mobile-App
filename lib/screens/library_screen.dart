@@ -206,6 +206,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 itemCount: filteredFiles.length,
                 itemBuilder: (BuildContext context, int index) {
                   final String file = filteredFiles[index];
+                  final fileName = file.split('/').last; 
                   return Dismissible(
                     key: Key(file),
                     direction: DismissDirection.endToStart,
@@ -226,7 +227,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                         Row(
                             children: [
                               Icon(
                                 Icons.picture_as_pdf,
@@ -234,17 +235,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                               ),
                               SizedBox(width: 10),
                               Expanded(
-                                child: Text(
-                                  file.split('/').last,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
+                                  child: _buildHighlightedTitle(fileName),
                               ),
                             ],
                           ),
+
                           SizedBox(height: 4),
                           Container(
                             height: 0.5, // Adjust thickness here
@@ -270,6 +265,83 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
+Widget _buildHighlightedTitle(String title) {
+  final RegExp regex = RegExp(_searchController.text, caseSensitive: false);
+  final Iterable<Match> matches = regex.allMatches(title);
+
+  // If no matches found, return the title as regular text
+  if (matches.isEmpty) {
+    return Text(
+      _truncateFilename(title), // Truncate filename
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
+      style: TextStyle(
+        fontSize: 16,
+        color: Colors.black, // Set the default color to black
+      ),
+    );
+  }
+
+  // Create a list of TextSpans to highlight the matches
+  final List<TextSpan> children = [];
+  int start = 0;
+  for (Match match in matches) {
+    if (match.start != start) {
+      children.add(
+        TextSpan(
+          text: _truncateFilename(title.substring(start, match.start)), // Truncate filename
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black, // Set the default color to black
+          ),
+        ),
+      );
+    }
+    children.add(
+      TextSpan(
+        text: title.substring(match.start, match.end),
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold, // Highlight style
+          color: Colors.blue, // Highlight color
+        ),
+      ),
+    );
+    start = match.end;
+  }
+
+  // Add the remaining part of the title
+  if (start != title.length) {
+    children.add(
+      TextSpan(
+        text: _truncateFilename(title.substring(start)), // Truncate filename
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.black, // Set the default color to black
+        ),
+      ),
+    );
+  }
+
+  return RichText(
+    text: TextSpan(
+      children: children,
+    ),
+    overflow: TextOverflow.ellipsis,
+    maxLines: 2,
+  );
+}
+
+String _truncateFilename(String fileName, {int maxLength = 20}) {
+  if (fileName.length <= maxLength) {
+    return fileName;
+  } else {
+    return fileName.substring(0, maxLength - 3) + '...'; // Truncate and add ellipsis
+  }
+}
+
+
+  
   void _sortFiles(String option) {
     setState(() {
       if (option == 'Date') {
