@@ -1,5 +1,4 @@
 import 'package:DILGDOCS/Services/auth_services.dart';
-import 'package:DILGDOCS/Services/globals.dart';
 import 'package:DILGDOCS/screens/change_password_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

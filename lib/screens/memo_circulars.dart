@@ -6,10 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// Import other necessary files
 import '../models/memo_circulars.dart';
-import 'sidebar.dart';
 import 'details_screen.dart';
 
 class MemoCirculars extends StatefulWidget {
@@ -173,29 +170,59 @@ Future<void> _openWifiSettings() async {
     return SingleChildScrollView(
       child: Column(
         children: [
+          // Container(
+          //   margin: EdgeInsets.only(top: 16.0),
+          //   padding: EdgeInsets.symmetric(horizontal: 16.0),
+          //   child: TextField(
+          //     controller: _searchController,
+          //     decoration: InputDecoration(
+          //       hintText: 'Search...',
+          //       prefixIcon: Icon(Icons.search, color: Colors.grey),
+          //       filled: true,
+          //       fillColor: Colors.white,
+          //       border: OutlineInputBorder(
+          //         borderRadius: BorderRadius.circular(20),
+          //         borderSide: BorderSide.none,
+          //       ),
+          //       contentPadding: EdgeInsets.symmetric(vertical: 16.0),
+          //     ),
+          //     style: TextStyle(fontSize: 16.0),
+          //     onChanged: (value) {
+          //       // Call the function to filter the list based on the search query
+          //       _filterMemoCirculars(value);
+          //     },
+          //   ),
+          // ),
           Container(
-            margin: EdgeInsets.only(top: 16.0),
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: EdgeInsets.symmetric(vertical: 16.0),
+          margin: EdgeInsets.only(top: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3), // changes position of shadow
               ),
-              style: TextStyle(fontSize: 16.0),
-              onChanged: (value) {
-                // Call the function to filter the list based on the search query
-                _filterMemoCirculars(value);
-              },
-            ),
+            ],
           ),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search...',
+              prefixIcon: Icon(Icons.search, color: Colors.grey),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 16.0),
+            ),
+            style: TextStyle(fontSize: 16.0),
+            onChanged: (value) {
+              // Call the function to filter the list based on the search query
+              _filterMemoCirculars(value); // Corrected method call
+            },
+          ),
+        ),
           // Display the filtered memo circulars
            Column(
           crossAxisAlignment: CrossAxisAlignment.start,
