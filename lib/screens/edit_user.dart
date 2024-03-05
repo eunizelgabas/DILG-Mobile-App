@@ -255,8 +255,7 @@ class _EditUserState extends State<EditUser> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                 Navigator.pushNamedAndRemoveUntil(
-                          context, Routes.home, (route) => false); // Navigate to the Settings screen
+                 Navigator.pop(context); 
                     },
                 child: Text('OK'),
               ),
@@ -302,8 +301,7 @@ class _EditUserState extends State<EditUser> {
                     ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context); // Close the EditUser screen
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, Routes.home, (route) => false); // Navigate to the Settings screen
+                       Navigator.pop(context); // Navigate to the Settings screen
                     },
                     child: Text('OK'),
                     ),

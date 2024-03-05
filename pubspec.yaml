@@ -88,6 +88,14 @@ flutter:
     - assets/girl 2.png
     - assets/girl 3.png
 
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins-Regular.otf
+        - asset: fonts/Poppins-Bold.otf
+        - asset: fonts/Poppins-Italic.otf
+        - asset: fonts/Poppins-BoldItalic.otf
+        
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
