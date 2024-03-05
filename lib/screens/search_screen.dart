@@ -219,12 +219,7 @@ Widget build(BuildContext context) {
         _navigateToSelectedPage(context, index);
       },
     ),
-    // bottomNavigationBar: BottomNavigation(
-    //   currentIndex: 1,
-    //   onTabTapped:(index){
-
-    //   },
-    // ),
+    
     body: SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),

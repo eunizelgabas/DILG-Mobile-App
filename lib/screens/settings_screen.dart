@@ -50,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     _getUserInfo();
     // fetchUserDetails();
-    _getSelectedAvatarPath();
+    // _getSelectedAvatarPath();
   }
 
   Future<void> _getUserInfo() async {
@@ -62,6 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       isAuthenticated = loggedIn;
       userName = name ?? '';
       email = userEmail ?? '';
+      _getSelectedAvatarPath();
     });
   }
   Future<void> _getSelectedAvatarPath() async {
