@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Home',
     'Search',
     'Library',
-    'Setting',
+    'Settings',
   ];
 
   DateTime? currentBackPressTime;
@@ -277,8 +277,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
+                  
                 ),
               ),
+             
               GestureDetector(
                 onTap: () {
                   // Add your clear list logic here
@@ -298,8 +300,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ],
+
           ),
         ),
+        Divider(
+                color: Colors.blue,
+                thickness: 2,
+                height: 2,
+              ),
         const SizedBox(height: 14.0),
         if (_recentlyOpenedIssuances.isEmpty)
           Center(
