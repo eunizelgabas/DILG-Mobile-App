@@ -6,8 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/presidential_directives.dart';
-import '../utils/routes.dart';
-import 'sidebar.dart';
 import 'details_screen.dart';
 import 'package:http/http.dart' as http;
 import "file_utils.dart";
@@ -286,23 +284,25 @@ Future<void> _openWifiSettings() async {
                                         highlightMatches(
                                             'Ref #: ${_filteredPresidentialDirectives[index].issuance.referenceNo}',
                                             _searchController.text),
+                                            
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,
                                         ),
                                       ),
+                                      if (_filteredPresidentialDirectives[index].responsible_office != 'N/A')
                                       Text.rich(
                                         highlightMatches(
                                             'Responsible Office: ${_filteredPresidentialDirectives[index].responsible_office}',
                                             _searchController.text),
-                                        style: TextStyle(
+                                            style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                  ],
+                                ),
                                 ),
                                 SizedBox(width: 16.0),
                                 Text(

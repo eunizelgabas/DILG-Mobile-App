@@ -9,7 +9,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 // Import other necessary files
 import '../models/memo_circulars.dart';
-import 'sidebar.dart';
 import 'details_screen.dart';
 
 class MemoCirculars extends StatefulWidget {
@@ -278,35 +277,28 @@ Future<void> _openWifiSettings() async {
                                         ),
                                         SizedBox(height: 4.0),
                                         Text.rich(
-                                          _filteredMemoCirculars[index]
-                                                      .issuance
-                                                      .referenceNo !=
-                                                  'N/A'
-                                              ? highlightMatches(
-                                                  'Ref #: ${_filteredMemoCirculars[index].issuance.referenceNo}',
-                                                  _searchController.text)
-                                              : TextSpan(text: 'Ref #: N/A'),
+                                          _filteredMemoCirculars[index].issuance.referenceNo != 'N/A'
+                                            ? highlightMatches(
+                                                'Ref #: ${_filteredMemoCirculars[index].issuance.referenceNo}',
+                                                _searchController.text)
+                                            : TextSpan(text: ''), // Render empty TextSpan when referenceNo is 'N/A'
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey,
                                           ),
                                         ),
                                         Text.rich(
-                                          _filteredMemoCirculars[index]
-                                                      .issuance
-                                                      .referenceNo !=
-                                                  'N/A'
-                                              ? highlightMatches(
-                                                  'Responsible Office: ${_filteredMemoCirculars[index].responsible_office}',
-                                                  _searchController.text)
-                                              : TextSpan(
-                                                  text:
-                                                      'Responsible Office: N/A'),
+                                          _filteredMemoCirculars[index].responsible_office != 'N/A'
+                                            ? highlightMatches(
+                                                'Responsible Office: ${_filteredMemoCirculars[index].responsible_office}',
+                                                _searchController.text)
+                                            : TextSpan(text: ''), // Render empty TextSpan when responsible_office is 'N/A'
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey,
                                           ),
                                         ),
+
                                       ],
                                     ),
                                   ),
@@ -362,7 +354,7 @@ Future<void> _openWifiSettings() async {
       MaterialPageRoute(
         builder: (context) => DetailsScreen(
           title: issuance.issuance.title,
-         content: 'Ref #: ${issuance.issuance.referenceNo != 'N/A' ? issuance.issuance.referenceNo + '\n' : ''}'
+         content: '${issuance.issuance.referenceNo != 'N/A' ? 'Ref #: ${issuance.issuance.referenceNo} \n' : ''}'
                 '${issuance.issuance.date != 'N/A' ? DateFormat('MMMM dd, yyyy').format(DateTime.parse(issuance.issuance.date)) + '\n' : ''}'
                 '${issuance.responsible_office != 'N/A' ? 'Category: ${issuance.responsible_office}\n' : ''}',
           pdfUrl: issuance.issuance.urlLink,

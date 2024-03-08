@@ -23,27 +23,42 @@ class Sidebar extends StatelessWidget {
         child: ListView(
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue[900]),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Image.asset(
-                    'assets/dilg-main.png',
-                    width: 70.0,
-                    height: 70.0,
-                  ),
-                  SizedBox(width: 8.0),
-                  const Text(
-                    'DILG - BOHOL PROVINCE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+  decoration: BoxDecoration(color: Colors.blue[900]),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Image.asset(
+        'assets/Tngkrw.png',
+        width: 70.0,
+        height: 70.0,
+      ),
+      SizedBox(width: 8.0),
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tangkaraw',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
             ),
+          ),
+          const SizedBox(height: 4.0), // Adding some space between the texts
+          const Text(
+            'DILG- Bohol Province',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12.0, // Adjust the font size as needed
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
             _buildSidebarItem(Icons.home, 'Home', 0, context),
             _buildSidebarItem(Icons.article, 'Latest Issuances', 1, context),
             _buildSidebarItem(

@@ -7,6 +7,7 @@ import 'sidebar.dart';
 import 'bottom_navigation.dart';
 import 'issuance_pdf_screen.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher package
+// import 'package:flutter/widgets.dart';
 
 class Issuance {
   final String title;
@@ -21,25 +22,41 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>  with WidgetsBindingObserver  {
   int _currentIndex = 0;
   List<String> _drawerMenuItems = [
     'Home',
     'Search',
     'Library',
-    'Setting',
+    'Settings',
   ];
 
   DateTime? currentBackPressTime;
 
   List<Issuance> _recentlyOpenedIssuances = [];
 
-  @override
+ @override
   void initState() {
     super.initState();
     _loadRecentIssuances();
+    WidgetsBinding.instance?.addObserver(this);
   }
 
+  @override
+    void didChangeAppLifecycleState(AppLifecycleState state) {
+      if (state == AppLifecycleState.paused ||
+          state == AppLifecycleState.inactive) {
+        _saveRecentIssuances();
+      }
+    }
+  @override
+    void dispose() {
+      _saveRecentIssuances();
+      WidgetsBinding.instance?.removeObserver(this);
+      super.dispose();
+    }
+
+    
   void _loadRecentIssuances() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? recentIssuances = prefs.getStringList('recentIssuances');
@@ -58,12 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await prefs.setStringList('recentIssuances', titles);
   }
 
-  @override
-  void dispose() {
-    _saveRecentIssuances();
-    super.dispose();
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -231,138 +243,105 @@ class _HomeScreenState extends State<HomeScreen> {
     Map<String, Issuance> seenTitles = {};
 
     // Get the first 5 recently opened issuances
-    List<Issuance> recentIssuances = _recentlyOpenedIssuances.take(5).toList();
+    List<Issuance> recentIssuances = _recentlyOpenedIssuances.take(5).toList();  
 
-    // Show the "Clear List" button only if there are recent issuances
-    Widget clearListButton = _recentlyOpenedIssuances.isNotEmpty
-        ? ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _recentlyOpenedIssuances.clear();
-              });
-            },
-            child: Text('Clear List'),
-          )
-        : SizedBox();
-
-    // See More Button
-    // Widget seeMoreButton = SizedBox();
-    // if (_recentlyOpenedIssuances.length > 4) {
-    //   seeMoreButton = TextButton(
-    //     onPressed: () {
-    //       Navigator.push(
-    //         context,
-    //         MaterialPageRoute(
-    //           builder: (context) => LibraryScreen(
-    //             onFileOpened:
-    //                 (title, subtitle) {}, // Provide dummy function or null
-    //           ),
-    //         ),
-    //       );
-    //     },
-    //     child: Text('See More'),
-    //   );
-    // }
-
-    return Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-    Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Recently Opened Issuances',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins', // Apply font family here
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              // Add your clear list logic here
-              // For example, you can clear the list by setting _recentlyOpenedIssuances to an empty list
-              setState(() {
-                _recentlyOpenedIssuances.clear();
-              });
-            },
-            child: Container(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Clear List',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontFamily: 'Poppins', // Apply font family here
-                ),
+   return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Recently Opened Issuances',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
               ),
             ),
-          ),
-        ],
-      ),
-    ),
-    const SizedBox(height: 14.0),
-    if (_recentlyOpenedIssuances.isEmpty)
-      Center(
-        child: Text(
-          'No recently opened Issuance/s',
-          style: TextStyle(
-            fontSize: 14,
-            fontStyle: FontStyle.italic,
-            fontFamily: 'Poppins', // Apply font family here
-          ),
-        ),
-      ),
-    if (_recentlyOpenedIssuances.isNotEmpty) ...[
-      ...recentIssuances.map((issuance) {
-        // Check if the title has already been seen
-        if (seenTitles.containsKey(issuance.title)) {
-          // If yes, skip displaying this issuance
-          return Container();
-        } else {
-          // Otherwise, add it to seen titles and display it
-          seenTitles[issuance.title] = issuance;
-          return Card(
-            elevation: 2.0,
-            margin: EdgeInsets.symmetric(vertical: 8.0),
-            child: ListTile(
-              title: Text(
-                issuance.title.length > 30
-                    ? '${issuance.title.substring(0, 30)}...'
-                    : issuance.title,
-                style: TextStyle(
-                  fontFamily: 'Poppins', // Apply font family here
-                ),
-              ),
-              onTap: () {
-                // Remove the current issuance from the list
-                setState(() {
-                  _recentlyOpenedIssuances.remove(issuance);
-                });
-                // Add the current issuance to the top of the list
-                setState(() {
-                  _recentlyOpenedIssuances.insert(0, issuance);
-                });
-                // Navigate to the PDF screen when the item is tapped
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => IssuancePDFScreen(
-                      title: issuance.title,
+            if (_recentlyOpenedIssuances.length >= 1) // Check if the list has 5 or more items
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _recentlyOpenedIssuances.clear();
+                  });
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Clear List',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontFamily: 'Poppins',
                     ),
                   ),
-                );
-              },
+                ),
+              ),
+              ],
             ),
-          );
-        }
-      }).toList(),
-    ],
-  ],
-);
-
-  }
+          ),
+          const SizedBox(height: 14.0),
+          if (_recentlyOpenedIssuances.isEmpty)
+            Center(
+              child: Text(
+                'No recently opened Issuance/s',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          if (_recentlyOpenedIssuances.isNotEmpty) ...[
+            ...recentIssuances.map((issuance) {
+              // Check if the title has already been seen
+              if (seenTitles.containsKey(issuance.title)) {
+                // If yes, skip displaying this issuance
+                return Container();
+              } else {
+                // Otherwise, add it to seen titles and display it
+                seenTitles[issuance.title] = issuance;
+                return Card(
+                  elevation: 2.0,
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
+                  child: ListTile(
+                    title: Text(
+                      issuance.title.length > 30
+                          ? '${issuance.title.substring(0, 30)}...'
+                          : issuance.title,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    onTap: () {
+                      // Remove the current issuance from the list
+                      setState(() {
+                        _recentlyOpenedIssuances.remove(issuance);
+                      });
+                      // Add the current issuance to the top of the list
+                      setState(() {
+                        _recentlyOpenedIssuances.insert(0, issuance);
+                      });
+                      // Navigate to the PDF screen when the item is tapped
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IssuancePDFScreen(
+                            title: issuance.title,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }
+            }).toList(),
+          ],
+        ],
+      );
+    }
 
   Widget _buildWideButton(String label, String url) {
     return GestureDetector(

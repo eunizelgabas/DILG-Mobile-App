@@ -18,7 +18,7 @@ class DetailsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           searchResult.title,
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white,  fontFamily: 'Poppins'),
         ),
          leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -106,7 +106,7 @@ Widget _buildSearchResults(List<SearchResult> searchResults, String searchInput)
  
 Future<void> downloadAndSavePdf(
     BuildContext context, String url, String title) async {
-  showDialog(
+    showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
