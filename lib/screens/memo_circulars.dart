@@ -327,10 +327,10 @@ Future<void> _openWifiSettings() async {
                       ),
                   ],
                 ),
-        ],
-      ),
-    );
-  }
+              ],
+            ),
+          );
+        }
 
   void _filterMemoCirculars(String query) {
     setState(() {

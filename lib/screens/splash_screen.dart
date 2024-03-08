@@ -49,7 +49,7 @@ Widget build(BuildContext context) {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 16),
-          CircularProgressIndicator(), // Place the CircularProgressIndicator here
+          // CircularProgressIndicator(), // Place the CircularProgressIndicator here
         ],
       ),
     ),
