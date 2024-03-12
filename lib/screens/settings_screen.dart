@@ -104,7 +104,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       : AssetImage('assets/default.png'),
                   radius: 50,
                 ),
-
                 SizedBox(width: 10.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,17 +114,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: TextStyle(color: Colors.blue),
                     ),
                     SizedBox(height: 4.0),
-                    Text(
-                      userName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
+                    Container(
+                      width: 200.0, // Set a fixed width for the container
+                      child: Text(
+                        userName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
+
             SizedBox(height: 20.0),
             // User Profile Button
             InkWell(

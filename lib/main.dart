@@ -1,9 +1,12 @@
+import 'package:DILGDOCS/Services/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:DILGDOCS/screens/splash_screen.dart'; // Import your splash screen widget here
 import '../utils/routes.dart';
 import '../Services/auth_services.dart';
 import '../screens/login_screen.dart';
 import '../screens/home_screen.dart';
+import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,9 +22,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     incrementDailyUserCount();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'DILG Bohol',
+      title: 'Tangkaraw',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
         useMaterial3: true,
@@ -65,5 +69,22 @@ class AuthenticationWrapper extends StatelessWidget {
     return isAuthenticated
         ? const HomeScreen()
         : const LoginScreen(title: 'Login');
+  }
+}
+
+void incrementDailyUserCount() async {
+  String localIdentifier = Uuid().v4();
+
+  var response = await http.post(
+    Uri.parse('$baseURL/visitor/count'),
+    body: {
+      'user_identifier': localIdentifier,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print('Daily user count incremented successfully');
+  } else {
+    print('Failed to increment daily user count: ${response.statusCode}');
   }
 }
