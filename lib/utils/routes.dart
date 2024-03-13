@@ -14,7 +14,7 @@ import '../screens/search_screen.dart';
 import '../screens/library_screen.dart';
 // import '../screens/intro_section.dart';
 import '../screens/login_screen.dart';
-// import 'package:DILGDOCS/screens/library_screen.dart';
+import 'package:DILGDOCS/screens/notification.dart';
 
 class Routes {
   static const String home = '/home';
@@ -32,6 +32,7 @@ class Routes {
   static const String setting = '/settings';
   static const String editUser = '/edit_user';
   static const String changePassword = '/change-password';
+  static const String notifications = '/notification';
 
   static Map<String, WidgetBuilder> getRoutes(BuildContext context) {
     return {
@@ -60,7 +61,8 @@ class Routes {
       editUser: (context) => EditUser(),
       changePassword: (context) => ChangePasswordScreen(),
       setting: (context) => SettingsScreen(),
-    };
+      notifications: (context ) => NotificationScreen(),
+      };
   }
 
   // static void navigateToLibrary(BuildContext context) {

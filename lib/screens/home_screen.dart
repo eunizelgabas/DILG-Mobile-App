@@ -1,3 +1,4 @@
+import 'package:DILGDOCS/screens/notification.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +25,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with WidgetsBindingObserver {
   int _currentIndex = 0;
+  int notificationCount = 0;
   List<String> _drawerMenuItems = [
     'Home',
     'Search',
@@ -116,7 +118,41 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 )
               : null,
-          automaticallyImplyLeading: true,
+          actions: [
+            Stack(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.notifications),
+                  onPressed: () {
+                    // Navigate to the screen that displays notifications
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => NotificationScreen()),
+                    );
+                  },
+                ),
+                if (notificationCount > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.red,
+                      ),
+                        child: Text(
+                        '$notificationCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
         body: _buildBody(),
         drawer: Sidebar(

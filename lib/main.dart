@@ -7,7 +7,6 @@ import '../screens/login_screen.dart';
 import '../screens/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   bool isAuthenticated = await AuthServices.isAuthenticated();

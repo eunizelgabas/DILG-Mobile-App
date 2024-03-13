@@ -7,6 +7,9 @@ package="com.example.flutter_voice">
 <uses-permission android:name="android.permission.BLUETOOTH"/>
 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+
+
+
     <application
         android:label="Tangkaraw"
         android:name="${applicationName}"
