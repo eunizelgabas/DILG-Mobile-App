@@ -61,7 +61,7 @@ class Routes {
       editUser: (context) => EditUser(),
       changePassword: (context) => ChangePasswordScreen(),
       setting: (context) => SettingsScreen(),
-      notifications: (context ) => NotificationScreen(),
+      // notifications: (context ) => NotificationScreen(),
       };
   }
 

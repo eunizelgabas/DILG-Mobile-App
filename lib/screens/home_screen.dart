@@ -30,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
   int notificationCount = 0;
-  bool showNotificationBadge = false;
+  
   List<String> _drawerMenuItems = [
     'Home',
     'Search',
@@ -43,12 +43,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late Timer _timer; // Timer variable for periodic checking
 
   @override
-void initState() {
-  super.initState();
-  _loadRecentIssuances();
-  WidgetsBinding.instance?.addObserver(this);
-   _loadNotificationBadge();
-}
+  void initState() {
+    super.initState();
+    _loadRecentIssuances();
+    WidgetsBinding.instance?.addObserver(this);
+   
+  }
 
   @override
   void dispose() {
@@ -57,76 +57,6 @@ void initState() {
     WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
-
-  void _startPeriodicCheck() {
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      _checkForNewNotifications();
-    });
-  }
-
-  // Load notification badge status from SharedPreferences
-  void _loadNotificationBadge() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool hasUnviewedIssuances = prefs.getBool('hasUnviewedIssuances') ?? false;
-    setState(() {
-      showNotificationBadge = hasUnviewedIssuances;
-      _startPeriodicCheck();
-    });
-  }
-
-  // Update notification badge status in SharedPreferences
-  void _updateNotificationBadge(bool hasUnviewedIssuances) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasUnviewedIssuances', hasUnviewedIssuances);
-  }
-
-void _checkForNewNotifications() async {
-  try {
-    // Fetch the token for authentication
-    String? token = await AuthServices.getToken();
-
-    // Make an HTTP GET request to retrieve recent issuances
-    final response = await http.get(
-      Uri.parse('${globals.baseURL}/recent-issuances'),
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token'
-      },
-    );
-
-    // Check if the server response is successful
-    if (response.statusCode == 200) {
-      // Parse the JSON response
-      Map<String, dynamic> recentData = json.decode(response.body)['recentIssuances'];
-
-      // Retrieve last check timestamp
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      int? lastCheckTimestamp = prefs.getInt('lastCheckTimestamp');
-
-      // Get current timestamp
-      int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-
-      // Check if last check was more than a day ago or if there are new issuances
-      if (lastCheckTimestamp == null ||
-          currentTimestamp - lastCheckTimestamp >= Duration.millisecondsPerDay ||
-          recentData['today'].isNotEmpty) {
-        // Update the notification count and last check timestamp
-        setState(() {
-          showNotificationBadge = true; // Show the badge
-        });
-        await prefs.setInt('lastCheckTimestamp', currentTimestamp);
-      }
-    } else {
-      // Handle server error if the response is not successful
-      throw Exception('Failed to load recent issuances');
-    }
-  } catch (e) {
-    // Handle any errors that occur during the process
-    print('Error: $e');
-  }
-}
-
-
 
   void _loadRecentIssuances() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -187,50 +117,6 @@ void _checkForNewNotifications() async {
                   ),
                 )
               : null,
-      actions: [
-  Stack(
-    children: [
-      IconButton(
-        icon: Icon(Icons.notifications, size: 30), // Adjust the size as needed
-        onPressed: () async {
-          // Navigate to the screen that displays notifications
-          bool hasUnviewedIssuances = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => NotificationScreen()),
-          );
-
-          // Update notification count and badge status when returning from the notification screen
-          setState(() {
-            notificationCount = 0;
-            showNotificationBadge = hasUnviewedIssuances;
-          });
-        },
-      ),
-      if (notificationCount > 0)
-        Positioned(
-          right: 8,
-          top: 8,
-          child: Container(
-            padding: EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.red,
-            ),
-            child: Text(
-              '$notificationCount',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ),
-    ],
-  ),
-],
-
-
-
         ),
         body: _buildBody(),
         drawer: Sidebar(
@@ -295,7 +181,7 @@ void _checkForNewNotifications() async {
                 ),
                 const SizedBox(height: 30.0),
                 WebViewWideButton(
-                  label: 'NEWS AND UPDATEs',
+                  label: 'NEWS AND UPDATES',
                   url: 'https://dilgbohol.com/news_update',
                 ),
                 WebViewWideButton(
@@ -303,7 +189,7 @@ void _checkForNewNotifications() async {
                   url: 'https://dilgbohol.com/provincial_director',
                 ),
                 WebViewWideButton(
-                  label: 'VISSION AND MISSION',
+                  label: 'VISION AND MISSION',
                   url: 'https://dilgbohol.com/about_us',
                 ),
                 Container(
