@@ -1,7 +1,4 @@
-import 'dart:async'; // Import for Timer
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'search_screen.dart';
 import 'library_screen.dart';
@@ -10,9 +7,6 @@ import 'sidebar.dart';
 import 'bottom_navigation.dart';
 import 'issuance_pdf_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:DILGDOCS/Services/auth_services.dart';
-import 'package:DILGDOCS/Services/globals.dart' as globals;
-import 'notification.dart'; // Import your notification screen here
 
 class Issuance {
   final String title;
@@ -29,8 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
-  int notificationCount = 0;
-  
+
   List<String> _drawerMenuItems = [
     'Home',
     'Search',
@@ -40,24 +33,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   DateTime? currentBackPressTime;
   List<Issuance> _recentlyOpenedIssuances = [];
-  late Timer _timer; // Timer variable for periodic checking
 
   @override
   void initState() {
     super.initState();
     _loadRecentIssuances();
     WidgetsBinding.instance?.addObserver(this);
-   
   }
 
   @override
   void dispose() {
-    _timer.cancel(); // Cancel the timer when the widget is disposed
     _saveRecentIssuances();
     WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _saveRecentIssuances();
+    }
+  }
+
+  // Load recently opened issuances from SharedPreferences
   void _loadRecentIssuances() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? recentIssuances = prefs.getStringList('recentIssuances');
@@ -69,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  // Save recently opened issuances to SharedPreferences
   void _saveRecentIssuances() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> titles =
@@ -310,8 +309,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   onTap: () {
                     setState(() {
                       _recentlyOpenedIssuances.remove(issuance);
-                    });
-                    setState(() {
                       _recentlyOpenedIssuances.insert(0, issuance);
                     });
                     Navigator.push(
